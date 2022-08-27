@@ -1,11 +1,13 @@
 <template>
-<!-- siempre va a cargar el último menú creado -->
+<!-- siempre va a cargar el último menú creado
+-->
   <div>
     <v-container>
       <v-row class="text-center">
         <v-col cols="12">
           <h1>Menú diario</h1>
-          <v-btn class="mb-3" color="success" @click="dateDialog = true">Crear nuevo menú</v-btn>
+          <v-btn class="mb-3" dark color="black" @click="dateDialog = true">Crear nuevo menú</v-btn>
+          <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true">Bloquear menú</v-btn>
           <form-component
             :formTitle="menuFormTitle"
             :formElements="menuFormItems"
@@ -15,28 +17,42 @@
             class="my-3"
             :headers="tableHeaders"
             :items="menuItems"
-            deleteButton
+            :deleteButton="allowDeleteButton"
             @deleteMenuItem="deleteMenuItem"
-            tableTitle="Menú del dia"
+            :tableTitle="menuTableTitle"
           />
         </v-col>
       </v-row>
     </v-container>
 
-<!-- crear un nuevo menú o mostrar el último -->
+<!-- dialogo para crear un nuevo menú -->
     <popup-dialog
       :dialog="dateDialog"
       actionConfirmText="crear"
       dialogTitle="Crear nuevo menú"
-      @closeDialog="closeDateDialog"
-      @confirmDialogAction="confirmDelete"
+      @closeDialog="dateDialog = false"
+      @confirmDialogAction="createNewMenu"
     >
       <v-date-picker
-        v-model="date"
+        v-model="menuDate"
         class="my-4"
         :min=today
         max="2035-12-31"
       ></v-date-picker>
+
+      <p>Nuevo menú: {{menuDate}}</p>
+    </popup-dialog>
+
+<!-- dialogo para bloquear el menú -->
+    <popup-dialog
+      :dialog="blockDialog"
+      actionConfirmText="bloquear"
+      dialogTitle="Bloquear menú"
+      actionConfirmColor="warning"
+      @closeDialog="blockDialog=false"
+      @confirmDialogAction="blockMenu"
+    >
+      No se podrá eliminar elementos del menú
     </popup-dialog>
 
   </div>
@@ -60,8 +76,12 @@ export default {
     return {
       today: new Date().toISOString().slice(0, 10),
       menuDate: '',
+      blockDialog: false,
       dateDialog: false,
+      dateDialogTitle: "Crear nuevo menú",
       menuFormTitle: "Añadir al menú",
+      menuTableTitle: "Menú del dia",
+      allowDeleteButton: true,
       menuFormItems: [
         {
           count: 50,
@@ -106,9 +126,6 @@ export default {
   },
 
   methods: {
-    closeDateDialog() {
-      this.dateDialog = false;
-    },
     saveMenuItem(formData) {
       const menuItem = {
         nombre: formData[0],
@@ -124,6 +141,22 @@ export default {
       //aca se comunica con el backend
       this.menuItems = this.menuItems.splice(index);
     },
+
+    createNewMenu(){
+      console.log(`Nuevo menú: ${this.menuDate}`);
+      this.menuTableTitle = `${this.menuTableTitle}: ${this.menuDate}`;
+      this.dateDialog = false;
+    },
+
+    blockMenu(){
+      this.tableHeaders.splice(this.tableHeaders.length - 1);
+      this.allowDeleteButton = false;
+      this.blockDialog = false;
+    }
+  },
+
+  created(){
+    //TODO poner la fecha del último menú en la tabla al crear
   },
 };
 </script>
