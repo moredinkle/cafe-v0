@@ -40,17 +40,10 @@ export default {
     return {
       drawerIsVisible: false,
       links: [
-        {
-          icon: "mdi-coffee-maker-outline",
-          text: "Menú del dia",
-          route: "/menu-dia",
-        },
-        {
-          icon: "mdi-pencil-circle-outline",
-          text: "Ventas",
-          route: "/",
-        },
-        { icon: "mdi-clipboard-text", text: "Historial", route: "/historial" },
+        { icon: "mdi-coffee-maker-outline", text: "Menú del dia", route: "/menu-dia", },
+        { icon: "mdi-receipt-text", text: "Pedidos", route: "/", },
+        { icon: "mdi-text-box-check-outline", text: "Cuentas", route: "/cuentas" },
+        { icon: "mdi-folder", text: "Historial", route: "/historial" },
       ],
     };
   },

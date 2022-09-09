@@ -2,17 +2,20 @@
   <v-app>
     <nav-bar />
     <v-main>
-      <router-view/>
+      <content-wrapper>
+        <router-view />
+      </content-wrapper>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import NavBar from './components/layout/NavBar.vue';
+import NavBar from "./components/layout/NavBar.vue";
+import ContentWrapper from "./components/layout/ContentWrapper.vue";
 
 export default {
-  components: { NavBar },
-  name: 'App',
+  components: { NavBar, ContentWrapper },
+  name: "App",
 
   data: () => ({
     //

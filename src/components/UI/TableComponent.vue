@@ -42,7 +42,10 @@ export default {
   props: {
     headers: Array,
     items: Array,
-    tableTitle: String,
+    tableTitle: {
+      type: String,
+      default: ''
+    },
     editButton: Boolean,
     deleteButton: Boolean,
   },
@@ -63,7 +66,7 @@ export default {
 
     confirmDelete(item) {
       this.dialog = false;
-      this.$emit("deleteMenuItem", item);
+      this.$emit("deleteTableItem", item);
     },
   },
 };

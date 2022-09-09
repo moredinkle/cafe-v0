@@ -32,22 +32,19 @@
     </v-row>
 
     <!-- snack para error al añadir o exito también puede ser -->
-    <v-snackbar v-model="snack" :timeout="2000" :color="snackColor">
-      {{ snackText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
+    <snack-bar :snackIsVisible="snack" :timeout="2000" :snackColor="snackColor" :snackText="snackText"/>
   </div>
 </template>
 
 <script>
 import CardComponent from "../UI/CardComponent.vue";
+import SnackBar from "../UI/SnackBar.vue";
 
 export default {
   name: "SalesMenu",
   components: {
     CardComponent,
+    SnackBar,
   },
   props: {},
   data() {

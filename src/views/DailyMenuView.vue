@@ -1,31 +1,25 @@
 <template>
-<!-- siempre va a cargar el último menú creado
+  <!-- siempre va a cargar el último menú creado
 -->
   <div>
-    <v-container>
-      <v-row class="text-center">
-        <v-col cols="12">
-          <h1>Menú diario</h1>
-          <v-btn class="mb-3" dark color="black" @click="dateDialog = true">Crear nuevo menú</v-btn>
-          <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true">Bloquear menú</v-btn>
-          <form-component
-            :formTitle="menuFormTitle"
-            :formElements="menuFormItems"
-            @saveForm="saveMenuItem"
-          />
-          <table-component
-            class="my-3"
-            :headers="tableHeaders"
-            :items="menuItems"
-            :deleteButton="allowDeleteButton"
-            @deleteMenuItem="deleteMenuItem"
-            :tableTitle="menuTableTitle"
-          />
-        </v-col>
-      </v-row>
-    </v-container>
+    <h1>Menú diario</h1>
+    <v-btn class="mb-3" dark color="black" @click="dateDialog = true">Crear nuevo menú</v-btn>
+    <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true">Bloquear menú</v-btn>
+    <form-component
+      :formTitle="menuFormTitle"
+      :formElements="menuFormItems"
+      @saveForm="saveMenuItem"
+    />
+    <table-component
+      class="my-3"
+      :headers="tableHeaders"
+      :items="menuItems"
+      :deleteButton="allowDeleteButton"
+      @deleteTableItem="deleteMenuItem"
+      :tableTitle="menuTableTitle"
+    />
 
-<!-- dialogo para crear un nuevo menú -->
+    <!-- dialogo para crear un nuevo menú -->
     <popup-dialog
       :dialog="dateDialog"
       actionConfirmText="crear"
@@ -36,25 +30,24 @@
       <v-date-picker
         v-model="menuDate"
         class="my-4"
-        :min=today
+        :min="today"
         max="2035-12-31"
       ></v-date-picker>
 
-      <p>Nuevo menú: {{menuDate}}</p>
+      <p>Nuevo menú: {{ menuDate }}</p>
     </popup-dialog>
 
-<!-- dialogo para bloquear el menú -->
+    <!-- dialogo para bloquear el menú -->
     <popup-dialog
       :dialog="blockDialog"
       actionConfirmText="bloquear"
       dialogTitle="Bloquear menú"
       actionConfirmColor="warning"
-      @closeDialog="blockDialog=false"
+      @closeDialog="blockDialog = false"
       @confirmDialogAction="blockMenu"
     >
       No se podrá eliminar elementos del menú
     </popup-dialog>
-
   </div>
 </template>
 
@@ -75,7 +68,7 @@ export default {
   data() {
     return {
       today: new Date().toISOString().slice(0, 10),
-      menuDate: '',
+      menuDate: "",
       blockDialog: false,
       dateDialog: false,
       dateDialogTitle: "Crear nuevo menú",
@@ -142,20 +135,20 @@ export default {
       this.menuItems = this.menuItems.splice(index);
     },
 
-    createNewMenu(){
+    createNewMenu() {
       console.log(`Nuevo menú: ${this.menuDate}`);
       this.menuTableTitle = `${this.menuTableTitle}: ${this.menuDate}`;
       this.dateDialog = false;
     },
 
-    blockMenu(){
+    blockMenu() {
       this.tableHeaders.splice(this.tableHeaders.length - 1);
       this.allowDeleteButton = false;
       this.blockDialog = false;
-    }
+    },
   },
 
-  created(){
+  created() {
     //TODO poner la fecha del último menú en la tabla al crear
   },
 };
