@@ -10,13 +10,18 @@
         <template v-if="deleteButton" v-slot:[`item.actions`]="{ item }">
           <v-icon small @click="toggleDialog(item)"> mdi-delete </v-icon>
         </template>
+        <!-- <template v-if="checkbox" v-slot:[`item.checkbox`]="{ item }">
+        <v-simple-checkbox
+          v-model="item.checkbox"
+        ></v-simple-checkbox>
+      </template> -->
       </v-data-table>
     </v-card>
 
     <popup-dialog
       :dialog="dialog"
       actionConfirmText="eliminar"
-      dialogTitle="Seguro que desea eliminar?"
+      :dialogTitle="dialogTitle"
       @closeDialog="closeDialog"
       @confirmDialogAction="confirmDelete"
     />
@@ -48,25 +53,29 @@ export default {
     },
     editButton: Boolean,
     deleteButton: Boolean,
+    checkbox: Boolean,
   },
   data() {
     return {
       dialog: false,
+      dialogTitle: '',
+      itemToDelete: {},
     };
   },
   methods: {
     toggleDialog(item) {
+      this.dialogTitle = `Seguro que desea eliminar ${item.nombre} ?`
       this.dialog = true;
-      console.log(`${item.nombre}  ${this.dialog}`);
+      this.itemToDelete = {...item};
     },
 
     closeDialog() {
       this.dialog = false;
     },
 
-    confirmDelete(item) {
+    confirmDelete() {
       this.dialog = false;
-      this.$emit("deleteTableItem", item);
+      this.$emit("deleteTableItem", this.itemToDelete);
     },
   },
 };

@@ -31,7 +31,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="warning" text @click="reset"> Vaciar </v-btn>
-      <v-btn color="success" text @click="save"> Guardar </v-btn>
+      <v-btn color="success" text @click="save" :disabled="!valid"> Guardar </v-btn>
     </v-card-actions>
   </v-card>
 </template>

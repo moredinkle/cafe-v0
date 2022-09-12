@@ -1,9 +1,9 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
-  <v-snackbar v-model="snackIsVisible" :timeout="timeout" :color="snackColor">
-    {{ snackText }}
+  <!-- eslint-disable-next-line vue/no-mutating-props -->
+  <v-snackbar v-model="showSnackbar" :timeout="timer" :color="color">
+    {{ text }}
     <template v-slot:action="{ attrs }">
-      <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
+      <v-btn v-bind="attrs" text @click="showSnackbar = false"> Close </v-btn>
     </template>
   </v-snackbar>
 </template>
@@ -11,11 +11,23 @@
 <script>
 export default {
   name: "SnackBar",
-  props: {
-    snackIsVisible: Boolean,
-    snackColor: String,
-    snackText: String,
-    timeout: Number,
+
+  data() {
+    return {
+      showSnackbar: false,
+      text: '',
+      color: '',
+      timer: 1000
+    };
   },
+
+  methods: {
+    show(data) {
+      this.text = data.text || 'missing "text".'
+      this.color = data.color || 'success'
+      this.timer = data.timer || 1000
+      this.showSnackbar = true
+    }
+  }
 };
 </script>

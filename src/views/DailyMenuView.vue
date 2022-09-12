@@ -3,8 +3,13 @@
 -->
   <div>
     <h1>Menú diario</h1>
-    <v-btn class="mb-3" dark color="black" @click="dateDialog = true">Crear nuevo menú</v-btn>
-    <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true">Bloquear menú</v-btn>
+    <h3 class="mb-4">Fecha menú actual: {{ fechaMenuActual }}</h3>
+    <v-btn class="mb-3" dark color="black" @click="dateDialog = true"
+      >Crear nuevo menú</v-btn
+    >
+    <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true"
+      >Bloquear menú</v-btn
+    >
     <form-component
       :formTitle="menuFormTitle"
       :formElements="menuFormItems"
@@ -28,14 +33,16 @@
       @confirmDialogAction="createNewMenu"
     >
       <v-date-picker
-        v-model="menuDate"
+        v-model="newMenuDate"
         class="my-4"
         :min="today"
         max="2035-12-31"
       ></v-date-picker>
 
-      <p>Nuevo menú: {{ menuDate }}</p>
+      <p>Nuevo menú: {{ newMenuDate }}</p>
     </popup-dialog>
+
+    <snack-bar />
 
     <!-- dialogo para bloquear el menú -->
     <popup-dialog
@@ -55,6 +62,7 @@
 import FormComponent from "../components/UI/FormComponent.vue";
 import TableComponent from "../components/UI/TableComponent.vue";
 import PopupDialog from "../components/UI/PopupDialog.vue";
+import SnackBar from "../components/UI/SnackBar.vue";
 
 export default {
   name: "DailyMenuView",
@@ -63,12 +71,31 @@ export default {
     FormComponent,
     TableComponent,
     PopupDialog,
+    SnackBar,
+  },
+
+  computed: {
+    fechaMenuActual() {
+      return this.$store.state.fechaActual;
+    },
+
+    idMenuActual() {
+      return this.$store.state.idMenuActual;
+    },
+
+    idResumenActual() {
+      return this.$store.state.idResumenActual;
+    },
+
+    estadoMenuActual() {
+      return this.$store.state.estadoMenuActual;
+    },
   },
 
   data() {
     return {
       today: new Date().toISOString().slice(0, 10),
-      menuDate: "",
+      newMenuDate: "",
       blockDialog: false,
       dateDialog: false,
       dateDialogTitle: "Crear nuevo menú",
@@ -105,40 +132,53 @@ export default {
         { text: "Precio", value: "precio" },
         { text: "Eliminar", value: "actions", sortable: false },
       ],
-      menuItems: [
-        {
-          nombre: "cosa 1",
-          precio: 23,
-        },
-        {
-          nombre: "cosa 2",
-          precio: 234,
-        },
-      ],
+      menuItems: [],
     };
   },
 
   methods: {
-    saveMenuItem(formData) {
-      const menuItem = {
-        nombre: formData[0],
-        precio: +formData[1],
-      };
-      //aca se comunica con el backend
-      this.menuItems.push(menuItem);
-      console.log(`${menuItem.nombre}--${menuItem.precio}`);
-    },
-
-    deleteMenuItem(item) {
-      let index = this.menuItems.indexOf(item);
-      //aca se comunica con el backend
-      this.menuItems = this.menuItems.splice(index);
-    },
-
     createNewMenu() {
-      console.log(`Nuevo menú: ${this.menuDate}`);
-      this.menuTableTitle = `${this.menuTableTitle}: ${this.menuDate}`;
       this.dateDialog = false;
+      //nuevo menú
+      const menu = { fecha_menu: this.newMenuDate };
+      this.$http
+        .post(`${this.$store.state.urlapi}menus/`, menu)
+        .then((response) => {
+          if (response.status == 200) {
+            //nuevo resumen
+            const resumen = {
+              fecha_resumen: this.newMenuDate,
+              id_menu: response.data.insertId,
+            };
+            console.log(resumen);
+            this.$http
+              .post(`${this.$store.state.urlapi}resumenes/`, resumen)
+              .then((resp) => {
+                if (resp.status == 200) {
+                  //guardar los nuevos ids en el store
+                  const menuData = {
+                    fecha: menu.fecha_menu,
+                    idMenu: resumen.id_menu,
+                    idResumen: resp.data.insertId,
+                    estadoMenu: 0,
+                  };
+                  this.$store.commit("setMenuData", menuData);
+                  this.getMenuItems();
+                  this.checkMenuState();
+                  this.$root.vtoast.show({
+                    text: "Nuevo menú creado",
+                    color: "success",
+                  });
+                }
+              })
+              .catch((error) => {
+                alert(`${error.message}`);
+              });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
     },
 
     blockMenu() {
@@ -146,10 +186,70 @@ export default {
       this.allowDeleteButton = false;
       this.blockDialog = false;
     },
+
+    saveMenuItem(formData) {
+      const menuItem = {
+        nombre: formData[0],
+        precio: +formData[1],
+      };
+      this.$http
+        .post(
+          `${this.$store.state.urlapi}menu-items/${this.idMenuActual}`,
+          menuItem
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            this.getMenuItems();
+            this.$root.vtoast.show({
+              text: "Añadido al menú",
+              color: "success",
+            });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+
+    deleteMenuItem(item) {
+      console.log(item.id_item_menu);
+      this.$http
+        .delete(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`)
+        .then((response) => {
+          if (response.status == 200) {
+            this.getMenuItems();
+            this.$root.vtoast.show({ text: "Eliminado del menú", color: "warning" });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+
+    getMenuItems() {
+      this.$http
+        .get(`${this.$store.state.urlapi}menu-items/${this.idMenuActual}`)
+        .then((response) => {
+          if (response.status == 200) {
+            this.menuItems = JSON.parse(JSON.stringify(response.data));
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+
+    checkMenuState() {
+      if (this.estadoMenuActual !== 0) {
+        this.allowDeleteButton = false;
+        this.tableHeaders.splice(2, 1);
+      }
+    },
   },
 
   created() {
-    //TODO poner la fecha del último menú en la tabla al crear
+    this.getMenuItems();
+    this.checkMenuState();
   },
 };
 </script>

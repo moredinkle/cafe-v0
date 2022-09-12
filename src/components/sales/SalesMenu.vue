@@ -31,8 +31,7 @@
       </v-col>
     </v-row>
 
-    <!-- snack para error al añadir o exito también puede ser -->
-    <snack-bar :snackIsVisible="snack" :timeout="2000" :snackColor="snackColor" :snackText="snackText"/>
+    <snack-bar />
   </div>
 </template>
 
@@ -50,64 +49,40 @@ export default {
   data() {
     return {
       valid: true,
-      snack: false,
-      snackColor: "",
-      snackText: "",
       cantidadRules: [
         (v) => !!v || "Campo obligatorio",
         (v) =>
           (v && parseInt(v) > 0 && parseInt(v) <= 10) || "Máximo 10, minimo 1",
       ],
-      menuItems: [
-        {
-          id: "mi1",
-          nombre: "cosa 1",
-          precio: 5,
-          cantidad: 1,
-          textoPrecio: "",
-        },
-        {
-          id: "mi2",
-          nombre: "cosa 2",
-          precio: 3,
-          cantidad: 1,
-          textoPrecio: "",
-        },
-        {
-          id: "mi3",
-          nombre: "cafe",
-          precio: 5,
-          cantidad: 1,
-          textoPrecio: "",
-        },
-        {
-          id: "mi4",
-          nombre: "queque",
-          precio: 8,
-          cantidad: 1,
-          textoPrecio: "",
-        },
-      ],
       availableItems: [],
-      order: [],
     };
   },
   methods: {
     copyMenu() {
-      //? enviar con cantidad y textoPrecio desde el backend (?) añadirlo ahi y enviarlo con esto (?)
-      this.availableItems = this.menuItems.slice();
-      this.availableItems.map((item) => {
-        item["textoPrecio"] = `Bs. ${item["precio"]}`;
-      });
+      this.$http
+        .get(
+          `${this.$store.state.urlapi}menu-items/${this.$store.state.idMenuActual}`
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            this.availableItems = JSON.parse(JSON.stringify(response.data));
+            this.availableItems.map((item) => {
+              item["textoPrecio"] = `Bs. ${item["precio"]}`;
+              item["subtotal"] = item["precio"];
+            });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
     },
 
     addToOrder(item) {
       if (item.cantidad > 10 || item.cantidad < 1) {
-        this.snackColor = "error";
-        this.snackText = "Intenta otra vez";
-        this.snack = true;
+        this.$root.vtoast.show({ text: "Error", color: "error" });
         return;
       }
+      //TODO revisar si ya hay uno en la orden
       this.$emit("itemAddedToOrder", item);
       item.cantidad = 1;
     },
