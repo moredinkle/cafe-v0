@@ -1,7 +1,8 @@
 <template>
   <v-card rounded>
     <v-card-title>
-      <span class="text-h5">{{ formTitle }}</span>
+      <div class="text-h5 mx-5">{{ formTitle }}</div>
+      <slot></slot>
     </v-card-title>
     <v-card-text>
       <v-container>

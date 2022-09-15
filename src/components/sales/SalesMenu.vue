@@ -12,6 +12,7 @@
           :cardTitle="item.nombre"
           buttonColor="success"
           buttonText="añadir"
+          :allowButton="true"
           @confirmCardAction="addToOrder(item)"
         >
           <h2 class="mb-3">{{ item.textoPrecio }}</h2>
@@ -65,7 +66,7 @@ export default {
         )
         .then((response) => {
           if (response.status == 200) {
-            this.availableItems = JSON.parse(JSON.stringify(response.data));
+            this.availableItems = JSON.parse(JSON.stringify(response.data)).filter(item => item.estado === 1);
             this.availableItems.map((item) => {
               item["textoPrecio"] = `Bs. ${item["precio"]}`;
               item["subtotal"] = item["precio"];
@@ -82,7 +83,6 @@ export default {
         this.$root.vtoast.show({ text: "Error", color: "error" });
         return;
       }
-      //TODO revisar si ya hay uno en la orden
       this.$emit("itemAddedToOrder", item);
       item.cantidad = 1;
     },

@@ -42,7 +42,7 @@ export default {
       links: [
         { icon: "mdi-coffee-maker-outline", text: "Menú del dia", route: "/menu-dia", },
         { icon: "mdi-receipt-text", text: "Pedidos", route: "/", },
-        { icon: "mdi-text-box-check-outline", text: "Cuentas", route: "/cuentas" },
+        { icon: "mdi-text-box-check-outline", text: "Resumen", route: "/resumen" },
         { icon: "mdi-folder", text: "Historial", route: "/historial" },
       ],
     };

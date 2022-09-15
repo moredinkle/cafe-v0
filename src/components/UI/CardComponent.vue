@@ -5,7 +5,7 @@
     <v-card-text class="justify-center">
       <slot></slot>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions v-if="allowButton">
       <v-btn block x-large :color="buttonColor" dark @click="confirmAction">{{
         buttonText
       }}</v-btn>
@@ -31,6 +31,7 @@ export default {
     buttonColor: String,
     buttonText: String,
     cancelButton: Boolean,
+    allowButton: Boolean,
   },
   data() {
     return {};

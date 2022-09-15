@@ -10,11 +10,9 @@
         <template v-if="deleteButton" v-slot:[`item.actions`]="{ item }">
           <v-icon small @click="toggleDialog(item)"> mdi-delete </v-icon>
         </template>
-        <!-- <template v-if="checkbox" v-slot:[`item.checkbox`]="{ item }">
-        <v-simple-checkbox
-          v-model="item.checkbox"
-        ></v-simple-checkbox>
-      </template> -->
+        <!-- <template v-if="allowCheckbox" v-slot:[`item.checkbox`]="{ item }">
+          <v-simple-checkbox @input="checkboxChange(item)" v-model="item.checkbox"></v-simple-checkbox>
+        </template> -->
       </v-data-table>
     </v-card>
 
@@ -25,14 +23,6 @@
       @closeDialog="closeDialog"
       @confirmDialogAction="confirmDelete"
     />
-
-    <!-- <v-snackbar v-model="snack" :timeout="2000" :color="snackColor">
-      {{ snackText }}
-
-      <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false"> Close </v-btn>
-      </template>
-    </v-snackbar> -->
   </div>
 </template>
 
@@ -49,25 +39,30 @@ export default {
     items: Array,
     tableTitle: {
       type: String,
-      default: ''
+      default: "",
     },
     editButton: Boolean,
     deleteButton: Boolean,
-    checkbox: Boolean,
+    // allowCheckbox: Boolean,
   },
   data() {
     return {
       dialog: false,
-      dialogTitle: '',
+      dialogTitle: "",
       itemToDelete: {},
     };
   },
   methods: {
     toggleDialog(item) {
-      this.dialogTitle = `Seguro que desea eliminar ${item.nombre} ?`
+      this.dialogTitle = `Seguro que desea eliminar ${item.nombre} ?`;
       this.dialog = true;
-      this.itemToDelete = {...item};
+      this.itemToDelete = { ...item };
     },
+
+    // checkboxChange(item) {
+    //   console.log(item);
+    //   this.$emit("checkboxChange", item);
+    // },
 
     closeDialog() {
       this.dialog = false;

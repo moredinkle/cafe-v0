@@ -111,7 +111,7 @@ export default {
         this.order.push(aux);
       }
       this.calcularPrecioFinal();
-      this.$root.vtoast.show({ text: "Añadido al pedido", color: "success" });
+      this.$root.vtoast.show({ text: "Añadido al pedido", color: "info" });
     },
 
     deleteOrderItem(item) {
@@ -146,7 +146,8 @@ export default {
       };
       let promesas = [];
       // primero crear el pedido
-      this.$http.post(`${this.$store.state.urlapi}pedidos`, pedido)
+      this.$http
+        .post(`${this.$store.state.urlapi}pedidos`, pedido)
         .then((response) => {
           if (response.status == 200) {
             //ahora guardar cada item del pedido
@@ -158,7 +159,8 @@ export default {
                 subtotal: item.subtotal,
               };
               promesas.push(
-                this.$http.post(`${this.$store.state.urlapi}pedido-items`, item_pedido)
+                this.$http
+                  .post(`${this.$store.state.urlapi}pedido-items`, item_pedido)
                   .then((response) => {
                     if (response.status == 200) {
                       response.data;
@@ -171,29 +173,31 @@ export default {
             });
 
             Promise.all(promesas).then((res) => {
-              console.log(res);
+              res;
               this.order = [];
               this.cambio = 0;
               this.pagadoCon = +0;
               this.guardarPedidoValid = true;
               //si el menú es nuevo, lo bloquea
-              if (this.estadoMenuActual === 0) {
-                const menu = {estado_menu: 1};
-                this.$http.put(`${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`, menu)
-                  .then((response) => {
-                    if (response.status == 200) {
-                      this.$store.commit("cambiarEstadoMenu", 1);
-                    }
-                  })
-                  .catch((error) => {
-                    alert(`${error.message}`);
-                  });
-              }
+              if (this.estadoMenuActual === 0) this.setCurrentMenu();
               this.$root.vtoast.show({
                 text: "Pedido guardado!",
                 color: "success",
               });
             });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+
+    setCurrentMenu() {
+      const menu = { estado_menu: 1 };
+      this.$http.put(`${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,menu)
+        .then((response) => {
+          if (response.status == 200) {
+            this.$store.commit("cambiarEstadoMenu", 1);
           }
         })
         .catch((error) => {

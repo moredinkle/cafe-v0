@@ -7,9 +7,6 @@
     <v-btn class="mb-3" dark color="black" @click="dateDialog = true"
       >Crear nuevo menú</v-btn
     >
-    <v-btn class="mx-3 mb-3" dark color="warning" @click="blockDialog = true"
-      >Bloquear menú</v-btn
-    >
     <form-component
       :formTitle="menuFormTitle"
       :formElements="menuFormItems"
@@ -23,6 +20,18 @@
       @deleteTableItem="deleteMenuItem"
       :tableTitle="menuTableTitle"
     />
+
+    <card-component cardTitle="Disponibilidad">
+      <div v-for="item in menuItems" :key="item.id_item_menu">
+        <v-spacer></v-spacer>
+        <v-switch
+          v-model="item.checkbox"
+          inset
+          :label="item.nombre"
+          @change="changeItemState(item)"
+        ></v-switch>
+      </div>
+    </card-component>
 
     <!-- dialogo para crear un nuevo menú -->
     <popup-dialog
@@ -43,24 +52,13 @@
     </popup-dialog>
 
     <snack-bar />
-
-    <!-- dialogo para bloquear el menú -->
-    <popup-dialog
-      :dialog="blockDialog"
-      actionConfirmText="bloquear"
-      dialogTitle="Bloquear menú"
-      actionConfirmColor="warning"
-      @closeDialog="blockDialog = false"
-      @confirmDialogAction="blockMenu"
-    >
-      No se podrá eliminar elementos del menú
-    </popup-dialog>
   </div>
 </template>
 
 <script>
 import FormComponent from "../components/UI/FormComponent.vue";
 import TableComponent from "../components/UI/TableComponent.vue";
+import CardComponent from "../components/UI/CardComponent.vue";
 import PopupDialog from "../components/UI/PopupDialog.vue";
 import SnackBar from "../components/UI/SnackBar.vue";
 
@@ -72,6 +70,7 @@ export default {
     TableComponent,
     PopupDialog,
     SnackBar,
+    CardComponent,
   },
 
   computed: {
@@ -96,7 +95,6 @@ export default {
     return {
       today: new Date().toISOString().slice(0, 10),
       newMenuDate: "",
-      blockDialog: false,
       dateDialog: false,
       dateDialogTitle: "Crear nuevo menú",
       menuFormTitle: "Añadir al menú",
@@ -130,6 +128,7 @@ export default {
           value: "nombre",
         },
         { text: "Precio", value: "precio" },
+        // { text: "Disponible", value: "checkbox", sortable: false },
         { text: "Eliminar", value: "actions", sortable: false },
       ],
       menuItems: [],
@@ -141,8 +140,7 @@ export default {
       this.dateDialog = false;
       //nuevo menú
       const menu = { fecha_menu: this.newMenuDate };
-      this.$http
-        .post(`${this.$store.state.urlapi}menus/`, menu)
+      this.$http.post(`${this.$store.state.urlapi}menus/`, menu)
         .then((response) => {
           if (response.status == 200) {
             //nuevo resumen
@@ -150,11 +148,11 @@ export default {
               fecha_resumen: this.newMenuDate,
               id_menu: response.data.insertId,
             };
-            console.log(resumen);
-            this.$http
-              .post(`${this.$store.state.urlapi}resumenes/`, resumen)
+            this.$http.post(`${this.$store.state.urlapi}resumenes/`, resumen)
               .then((resp) => {
                 if (resp.status == 200) {
+                  //cambiar estado menu a completado
+                  this.setMenuCompleted();
                   //guardar los nuevos ids en el store
                   const menuData = {
                     fecha: menu.fecha_menu,
@@ -179,12 +177,6 @@ export default {
         .catch((error) => {
           alert(`${error.message}`);
         });
-    },
-
-    blockMenu() {
-      this.tableHeaders.splice(this.tableHeaders.length - 1);
-      this.allowDeleteButton = false;
-      this.blockDialog = false;
     },
 
     saveMenuItem(formData) {
@@ -212,13 +204,16 @@ export default {
     },
 
     deleteMenuItem(item) {
-      console.log(item.id_item_menu);
+      // console.log(item.id_item_menu);
       this.$http
         .delete(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`)
         .then((response) => {
           if (response.status == 200) {
             this.getMenuItems();
-            this.$root.vtoast.show({ text: "Eliminado del menú", color: "warning" });
+            this.$root.vtoast.show({
+              text: "Eliminado del menú",
+              color: "warning",
+            });
           }
         })
         .catch((error) => {
@@ -232,6 +227,24 @@ export default {
         .then((response) => {
           if (response.status == 200) {
             this.menuItems = JSON.parse(JSON.stringify(response.data));
+            this.menuItems.map((item) => {
+              item.estado === 1
+                ? (item["checkbox"] = true)
+                : (item["checkbox"] = false);
+            });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+//TODO al crear nuevo menú, actualizar estado del actual a 2 -> completado y pasa a historial, luego de resumen
+    changeItemState(item) {
+      const item_menu = {estado: item.checkbox === true ? 1 : 0};
+      this.$http.put(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`,item_menu)
+        .then((response) => {
+          if (response.status == 200) {
+            this.getMenuItems();
           }
         })
         .catch((error) => {
@@ -242,8 +255,21 @@ export default {
     checkMenuState() {
       if (this.estadoMenuActual !== 0) {
         this.allowDeleteButton = false;
-        this.tableHeaders.splice(2, 1);
+        this.tableHeaders.splice(this.tableHeaders.length - 1, 1);
       }
+    },
+
+    setMenuCompleted() {
+      const menu = { estado_menu: 2 };
+      this.$http.put(`${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,menu)
+        .then((response) => {
+          if (response.status == 200) {
+            this.$store.commit("cambiarEstadoMenu", 2);
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
     },
   },
 
