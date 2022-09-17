@@ -7,10 +7,6 @@
         :items="resumenItems"
         tableTitle="Ventas"
       />
-      <h2 class="ma-3 font-weight-black blue--text text--darken-4">
-        Total ventas: {{ totalVentas }}
-      </h2>
-
       <table-component
         class="my-3"
         :headers="extraTableHeaders"
@@ -20,6 +16,8 @@
         @deleteTableItem="deleteExtraItem"
       />
       <h2 class="my-6 font-weight-black blue--text text--darken-4">
+        Total ventas: {{ totalVentas }}
+        <v-divider class="my-2"></v-divider>
         Total ventas +/- extras: {{ totalFinal }}
         <v-divider class="my-2"></v-divider>
         Total / 2: {{totalFinal/2}}
@@ -114,13 +112,14 @@ export default {
               total += item.subtotal;
             });
             this.totalVentas = total;
+            this.getExtraItems();
           }
         })
         .catch((error) => {
           alert(`${error.message}`);
         });
     },
-//TODO continuar aca
+    
     getExtraItems(){
       this.$http.get(`${this.$store.state.urlapi}extras/${this.$store.state.idResumenActual}`)
         .then((response) => {
@@ -139,6 +138,8 @@ export default {
               }
             });
             this.totalExtras = total;
+            //guardar el nuevo total
+            this.$store.commit("cambiarTotalFinal", this.totalVentas + this.totalExtras);
           }
         })
         .catch((error) => {
@@ -178,7 +179,8 @@ export default {
   },
   created() {
     this.getResumenItems();
-    this.getExtraItems();
-  },
+  }
 };
 </script>
+
+//Todo al crear menu nuevo, cambiar el menu del actual

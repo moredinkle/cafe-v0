@@ -93,7 +93,7 @@ export default {
 
   data() {
     return {
-      today: new Date().toISOString().slice(0, 10),
+      today: "",
       newMenuDate: "",
       dateDialog: false,
       dateDialogTitle: "Crear nuevo menú",
@@ -140,7 +140,8 @@ export default {
       this.dateDialog = false;
       //nuevo menú
       const menu = { fecha_menu: this.newMenuDate };
-      this.$http.post(`${this.$store.state.urlapi}menus/`, menu)
+      this.$http
+        .post(`${this.$store.state.urlapi}menus/`, menu)
         .then((response) => {
           if (response.status == 200) {
             //nuevo resumen
@@ -148,25 +149,12 @@ export default {
               fecha_resumen: this.newMenuDate,
               id_menu: response.data.insertId,
             };
-            this.$http.post(`${this.$store.state.urlapi}resumenes/`, resumen)
+            this.$http
+              .post(`${this.$store.state.urlapi}resumenes/`, resumen)
               .then((resp) => {
                 if (resp.status == 200) {
                   //cambiar estado menu a completado
-                  this.setMenuCompleted();
-                  //guardar los nuevos ids en el store
-                  const menuData = {
-                    fecha: menu.fecha_menu,
-                    idMenu: resumen.id_menu,
-                    idResumen: resp.data.insertId,
-                    estadoMenu: 0,
-                  };
-                  this.$store.commit("setMenuData", menuData);
-                  this.getMenuItems();
-                  this.checkMenuState();
-                  this.$root.vtoast.show({
-                    text: "Nuevo menú creado",
-                    color: "success",
-                  });
+                  this.setMenuCompleted(resumen, resp.data.insertId);
                 }
               })
               .catch((error) => {
@@ -238,10 +226,14 @@ export default {
           alert(`${error.message}`);
         });
     },
-//TODO al crear nuevo menú, actualizar estado del actual a 2 -> completado y pasa a historial, luego de resumen
+
     changeItemState(item) {
-      const item_menu = {estado: item.checkbox === true ? 1 : 0};
-      this.$http.put(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`,item_menu)
+      const item_menu = { estado: item.checkbox === true ? 1 : 0 };
+      this.$http
+        .put(
+          `${this.$store.state.urlapi}menu-items/${item.id_item_menu}`,
+          item_menu
+        )
         .then((response) => {
           if (response.status == 200) {
             this.getMenuItems();
@@ -259,12 +251,46 @@ export default {
       }
     },
 
-    setMenuCompleted() {
+    setMenuCompleted(resumenData, idresumen) {
       const menu = { estado_menu: 2 };
-      this.$http.put(`${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,menu)
+      this.$http
+        .put(
+          `${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,
+          menu
+        )
         .then((response) => {
           if (response.status == 200) {
-            this.$store.commit("cambiarEstadoMenu", 2);
+            const resumen = {
+              total_recaudado: this.$store.state.totalFinalActual,
+            };
+            this.$http
+              .put(
+                `${this.$store.state.urlapi}resumenes/${this.$store.state.idResumenActual}`,
+                resumen
+              )
+              .then((response) => {
+                if (response.status == 200) {
+                  //guardar los nuevos ids en el store
+                  const menuData = {
+                    fecha: resumenData.fecha_resumen,
+                    idMenu: resumenData.id_menu,
+                    idResumen: idresumen,
+                    estadoMenu: 0,
+                  };
+                  this.$store.commit("setMenuData", menuData);
+                  this.$store.commit("cambiarTotalFinal", 0);
+                  // location.reload();
+                  this.getMenuItems();
+                  this.checkMenuState();
+                  this.$root.vtoast.show({
+                    text: "Nuevo menú creado",
+                    color: "success",
+                  });
+                }
+              })
+              .catch((error) => {
+                alert(`${error.message}`);
+              });
           }
         })
         .catch((error) => {
@@ -276,6 +302,10 @@ export default {
   created() {
     this.getMenuItems();
     this.checkMenuState();
+    var date = new Date();
+    this.today = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
   },
 };
 </script>

@@ -2,7 +2,7 @@
   <div>
     <v-app-bar app color="black" dark>
       <v-app-bar-nav-icon @click.stop="drawerIsVisible = !drawerIsVisible"/>
-      <v-toolbar-title>logo_cafe.jpg</v-toolbar-title>
+      <v-toolbar-title>logo_cafe.png</v-toolbar-title>
     </v-app-bar>
 
     <v-navigation-drawer

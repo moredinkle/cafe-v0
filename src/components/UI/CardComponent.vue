@@ -6,7 +6,7 @@
       <slot></slot>
     </v-card-text>
     <v-card-actions v-if="allowButton">
-      <v-btn block x-large :color="buttonColor" dark @click="confirmAction">{{
+      <v-btn block x-large dark :color="buttonColor" :to="toRoute" @click="confirmAction">{{
         buttonText
       }}</v-btn>
       <!-- <div v-if="cancelButton">
@@ -31,6 +31,7 @@ export default {
     buttonColor: String,
     buttonText: String,
     cancelButton: Boolean,
+    toRoute: String,
     allowButton: Boolean,
   },
   data() {

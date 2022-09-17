@@ -16,8 +16,8 @@ export default new Vuex.Store({
     idMenuActual: 0,
     idResumenActual: 0,
     estadoMenuActual: 0,
+    totalFinalActual: 0,
     fechaActual: "",
-    snackVisible: false,
     urlapi: "http://localhost:3000/api/",
   },
 
@@ -36,6 +36,10 @@ export default new Vuex.Store({
 
     cambiarFecha(state) {
       state.fechaActual = new Date().slice(0, 10);
+    },
+
+    cambiarTotalFinal(state, payload) {
+      state.totalFinalActual = +payload;
     },
 
     setMenuData(state, { fecha, idMenu, idResumen, estadoMenu }) {

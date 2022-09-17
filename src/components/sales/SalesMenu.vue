@@ -6,7 +6,7 @@
         sm="6"
         md="4"
         v-for="item in availableItems"
-        :key="item.id"
+        :key="item.id_item_menu"
       >
         <card-component
           :cardTitle="item.nombre"
@@ -88,7 +88,7 @@ export default {
     },
   },
 
-  created() {
+  mounted() {
     this.copyMenu();
   },
 };

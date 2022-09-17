@@ -118,7 +118,6 @@ export default {
       this.order = this.order.filter(
         (i) => i.id_item_menu !== item.id_item_menu
       );
-      //? aca se comunica con el backend, esto de splice verlo despues con el backend (tambien en menu diario)
       this.calcularPrecioFinal();
       this.$root.vtoast.show({ text: "Eliminado", color: "warning" });
     },
@@ -137,7 +136,6 @@ export default {
     },
 
     saveOrder() {
-      //TODO esto es backend, limpiar el array order y palante, cambio y con cuanto se paga
       const pedido = {
         precio_total: this.precioFinal,
         pagado_con: +this.pagadoCon,
