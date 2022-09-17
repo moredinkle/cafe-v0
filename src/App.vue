@@ -41,6 +41,7 @@ export default {
               if (response.status == 200) {
                 menuData.idResumen = response.data[0].id_resumen;
                 this.$store.commit("setMenuData", menuData);
+                this.getMenuItems();
               }
             })
             .catch((error) => {
@@ -51,6 +52,26 @@ export default {
           alert(`${error.message}`);
         });
     },
+
+    getMenuItems() {
+      this.$http
+        .get(`${this.$store.state.urlapi}menu-items/${this.$store.state.idMenuActual}`)
+        .then((response) => {
+          if (response.status == 200) {
+            let aux = JSON.parse(JSON.stringify(response.data));
+            aux.map((item) => {
+              item.estado === 1
+                ? (item["checkbox"] = true)
+                : (item["checkbox"] = false);
+            });
+            this.$store.commit("setMenuItems", aux);
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+    //TODO cambiar las peticiones de getMenuItems a que utilicen el store. buscar todas y cambiarlas
   },
   mounted() {
     this.setCurrentMenuData();
@@ -64,7 +85,7 @@ export default {
 
 #app {
   /* font-family: "Chivo", sans-serif; */
-  /* font-family: "IBM Plex Sans Arabic", sans-serif; */
-  font-family: "Public Sans", sans-serif;
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  /* font-family: "Public Sans", sans-serif; */
 }
 </style>

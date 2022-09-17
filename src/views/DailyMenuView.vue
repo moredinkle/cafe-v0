@@ -179,7 +179,7 @@ export default {
         )
         .then((response) => {
           if (response.status == 200) {
-            this.getMenuItems();
+            this.requestMenuItems();
             this.$root.vtoast.show({
               text: "Añadido al menú",
               color: "success",
@@ -192,12 +192,11 @@ export default {
     },
 
     deleteMenuItem(item) {
-      // console.log(item.id_item_menu);
       this.$http
         .delete(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`)
         .then((response) => {
           if (response.status == 200) {
-            this.getMenuItems();
+            this.requestMenuItems();
             this.$root.vtoast.show({
               text: "Eliminado del menú",
               color: "warning",
@@ -210,16 +209,27 @@ export default {
     },
 
     getMenuItems() {
+      this.menuItems = this.$store.state.menuActualItems;
+      this.menuItems.map((item) => {
+        item.estado === 1
+          ? (item["checkbox"] = true)
+          : (item["checkbox"] = false);
+      });
+    },
+
+    requestMenuItems(){
       this.$http
         .get(`${this.$store.state.urlapi}menu-items/${this.idMenuActual}`)
         .then((response) => {
           if (response.status == 200) {
-            this.menuItems = JSON.parse(JSON.stringify(response.data));
-            this.menuItems.map((item) => {
+            let aux = JSON.parse(JSON.stringify(response.data));
+            aux.map((item) => {
               item.estado === 1
                 ? (item["checkbox"] = true)
                 : (item["checkbox"] = false);
             });
+            this.$store.commit("setMenuItems", aux);
+            this.getMenuItems();
           }
         })
         .catch((error) => {
@@ -236,7 +246,7 @@ export default {
         )
         .then((response) => {
           if (response.status == 200) {
-            this.getMenuItems();
+            this.requestMenuItems();
           }
         })
         .catch((error) => {
@@ -253,6 +263,7 @@ export default {
 
     setMenuCompleted(resumenData, idresumen) {
       const menu = { estado_menu: 2 };
+      //cambia estado menu a completado
       this.$http
         .put(
           `${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,
@@ -260,6 +271,7 @@ export default {
         )
         .then((response) => {
           if (response.status == 200) {
+            //guarda el resumen con su total recaudado
             const resumen = {
               total_recaudado: this.$store.state.totalFinalActual,
             };
@@ -279,7 +291,7 @@ export default {
                   };
                   this.$store.commit("setMenuData", menuData);
                   this.$store.commit("cambiarTotalFinal", 0);
-                  // location.reload();
+                  this.$store.commit("setMenuItems", []);
                   this.getMenuItems();
                   this.checkMenuState();
                   this.$root.vtoast.show({

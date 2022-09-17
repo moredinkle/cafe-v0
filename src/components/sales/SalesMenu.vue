@@ -60,22 +60,11 @@ export default {
   },
   methods: {
     copyMenu() {
-      this.$http
-        .get(
-          `${this.$store.state.urlapi}menu-items/${this.$store.state.idMenuActual}`
-        )
-        .then((response) => {
-          if (response.status == 200) {
-            this.availableItems = JSON.parse(JSON.stringify(response.data)).filter(item => item.estado === 1);
-            this.availableItems.map((item) => {
-              item["textoPrecio"] = `Bs. ${item["precio"]}`;
-              item["subtotal"] = item["precio"];
-            });
-          }
-        })
-        .catch((error) => {
-          alert(`${error.message}`);
-        });
+      this.availableItems = this.$store.state.menuActualItems;
+      this.availableItems.map((item) => {
+        item["textoPrecio"] = `Bs. ${item["precio"]}`;
+        item["subtotal"] = item["precio"];
+      });
     },
 
     addToOrder(item) {

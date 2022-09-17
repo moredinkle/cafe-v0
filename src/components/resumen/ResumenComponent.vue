@@ -19,13 +19,18 @@
       <v-divider class="my-2"></v-divider>
       Total / 2: {{ totalFinal / 2 }}
     </h2>
-    <slot></slot>
+    <v-btn color="info" x-large @click="verpdf">exportar a pdf</v-btn>
   </card-component>
 </template>
 
 <script>
 import TableComponent from "../UI/TableComponent.vue";
 import CardComponent from "../UI/CardComponent.vue";
+//pdf
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 export default {
   name: "ResumenComponent",
   components: { TableComponent, CardComponent },
@@ -37,7 +42,7 @@ export default {
   data() {
     return {
       resumenData: {},
-      sectionTitle: '',
+      sectionTitle: "",
       totalVentas: 0,
       totalExtras: 0,
       resumenTableHeaders: [
@@ -83,10 +88,7 @@ export default {
         });
     },
     getResumenItems() {
-      this.$http
-        .get(
-          `${this.$store.state.urlapi}menus/extra/data/${this.resumenData.id_menu}`
-        )
+      this.$http.get(`${this.$store.state.urlapi}menus/extra/data/${this.resumenData.id_menu}`)
         .then((response) => {
           if (response.status == 200) {
             this.resumenItems = JSON.parse(JSON.stringify(response.data));
@@ -104,8 +106,7 @@ export default {
     },
 
     getExtraItems() {
-      this.$http
-        .get(`${this.$store.state.urlapi}extras/${this.resumenData.id_resumen}`)
+      this.$http.get(`${this.$store.state.urlapi}extras/${this.resumenData.id_resumen}`)
         .then((response) => {
           if (response.status == 200) {
             this.extraItems = JSON.parse(JSON.stringify(response.data));
@@ -121,7 +122,10 @@ export default {
               }
             });
             this.totalExtras = total;
-            this.sectionTitle = `Resumen diario: ${this.resumenData.fecha_resumen.slice(0,10)}`;
+            this.sectionTitle = `Resumen diario: ${this.resumenData.fecha_resumen.slice(
+              0,
+              10
+            )}`;
             this.checkTotalRecaudado();
           }
         })
@@ -132,15 +136,87 @@ export default {
     checkTotalRecaudado() {
       if (this.resumenData.total_recaudado === 0 && this.totalFinal !== 0) {
         const resu = { total_recaudado: this.totalFinal };
-        this.$http.put(`${this.$store.state.urlapi}resumenes/${this.resumenData.id_resumen}`,resu)
+        this.$http
+          .put(
+            `${this.$store.state.urlapi}resumenes/${this.resumenData.id_resumen}`,
+            resu
+          )
           .catch((error) => {
             alert(`${error.message}`);
           });
       }
     },
+
+    verpdf() {
+      let ventasData = [[{ text: "Nombre", bold: true }, { text: "Precio", bold: true }, { text: "Cantidad", bold: true }, { text: "Subtotal", bold: true }]];
+      this.resumenItems.map(item => {
+        ventasData.push(Object.values(item));
+      });
+      let extrasData = [[{ text: "Descripción", bold: true }, { text: "Monto", bold: true }, { text: "Tipo", bold: true }]];
+      this.extraItems.map(item => {
+        const it = [item.descripcion, item.monto, item.tipo_display]
+        extrasData.push(Object.values(it));
+      });
+
+      let docDefinition = {
+        content: [
+          {
+            text: `Resumen diario: ${this.resumenData.fecha_resumen.slice(0,10)}`,
+            style: "header",
+          },
+          { text: "Ventas", style: "tableTitle" },
+          {
+            table: {
+              headerRows: 1,
+              widths: ["*", 100, 100, 100],
+              body: ventasData,
+            },
+          },
+          " ",
+          { text: "Extras", style: "tableTitle" },
+          {
+            table: {
+              headerRows: 1,
+              widths: ["*", 100, 100],
+              body: extrasData,
+            },
+          },
+          " ",
+          { text: `Total ventas: ${this.totalVentas}`, style: "resultsStyle" },
+          { text: `Total extras: ${this.totalExtras}`, style: "resultsStyle" },
+          " ",
+          { text: `Total final: ${this.totalFinal}`, style: "resultsStyle" },
+          { text: `Total/2: ${this.totalFinal/2}`, style: ["resultsStyle", "finalResults"] }
+        ],
+
+        styles: {
+          header: {
+            fontSize: 22,
+            lineHeight: 2,
+            bold: true,
+          },
+          tableTitle: {
+            italics: true,
+            lineHeight: 2,
+            fontSize: 18,
+          },
+          resultsStyle: {
+            italics: true,
+            fontSize: 14,
+            alignment: "center"
+          },
+          finalResults: {
+            color: 'blue'
+          },
+        },
+      };
+
+      const pdf = pdfMake.createPdf(docDefinition);
+      pdf.open();
+    },
   },
   created() {
     this.getResumenData();
-  }
+  },
 };
 </script>
