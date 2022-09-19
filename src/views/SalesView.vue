@@ -175,6 +175,7 @@ export default {
               this.order = [];
               this.cambio = 0;
               this.pagadoCon = +0;
+              this.precioFinal = 0;
               this.guardarPedidoValid = true;
               //si el menú es nuevo, lo bloquea
               if (this.estadoMenuActual === 0) this.setCurrentMenu();

@@ -12,7 +12,7 @@
         buttonColor="info"
         buttonText="visitar"
         :allowButton="true"
-        :toRoute="'resumen/' + item.id_resumen"
+        :toRoute="'historial/' + item.id_resumen+ '/' + item.id_menu"
       >
         <v-divider></v-divider>
         <h2 class="my-3">{{ item.fecha_resumen.slice(0, 10) }}</h2>

@@ -10,6 +10,8 @@
       class="my-3"
       :headers="extraTableHeaders"
       :items="extraItems"
+      :deleteButton="allowDeleteExtras"
+      @deleteTableItem="deleteExtraItem"
       tableTitle="Extras"
     />
     <h2 class="my-6 font-weight-black blue--text text--darken-4">
@@ -19,7 +21,10 @@
       <v-divider class="my-2"></v-divider>
       Total / 2: {{ totalFinal / 2 }}
     </h2>
-    <v-btn color="info" x-large @click="verpdf">exportar a pdf</v-btn>
+    <slot></slot>
+    <v-btn class="mt-5" color="info" x-large @click="verpdf"
+      >generar pdf</v-btn
+    >
   </card-component>
 </template>
 
@@ -34,17 +39,36 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 export default {
   name: "ResumenComponent",
   components: { TableComponent, CardComponent },
+  props: {
+    resumenItems: Array,
+    extraItems: Array,
+    idResumen: Number,
+    allowDeleteExtras: Boolean,
+  },
   computed: {
     totalFinal() {
       return this.totalVentas + this.totalExtras;
+    },
+    totalVentas() {
+      let total = 0;
+      this.resumenItems.map((item) => {
+        total += item.subtotal;
+      });
+      return total;
+    },
+    totalExtras() {
+      let tot = 0;
+      this.extraItems.map((item) => {
+        if (item.tipo === 1) tot -= item.monto;
+        else tot += item.monto;
+      });
+      return tot;
     },
   },
   data() {
     return {
       resumenData: {},
       sectionTitle: "",
-      totalVentas: 0,
-      totalExtras: 0,
       resumenTableHeaders: [
         {
           text: "Nombre",
@@ -65,67 +89,22 @@ export default {
         },
         { text: "Monto", value: "monto" },
         { text: "Tipo", value: "tipo_display" },
+        { text: "Eliminar", value: "actions", sortable: false },
       ],
-      resumenItems: [],
-      extraItems: [],
     };
   },
 
   methods: {
     getResumenData() {
       this.$http
-        .get(
-          `${this.$store.state.urlapi}resumenes/${this.$route.params.id_resumen}`
-        )
+        .get(`${this.$store.state.urlapi}resumenes/${this.idResumen}`)
         .then((response) => {
           if (response.status == 200) {
             this.resumenData = { ...response.data[0] };
-            this.getResumenItems();
-          }
-        })
-        .catch((error) => {
-          alert(`${error.message}`);
-        });
-    },
-    getResumenItems() {
-      this.$http.get(`${this.$store.state.urlapi}menus/extra/data/${this.resumenData.id_menu}`)
-        .then((response) => {
-          if (response.status == 200) {
-            this.resumenItems = JSON.parse(JSON.stringify(response.data));
-            let total = 0;
-            this.resumenItems.map((item) => {
-              total += item.subtotal;
-            });
-            this.totalVentas = total;
-            this.getExtraItems();
-          }
-        })
-        .catch((error) => {
-          alert(`${error.message}`);
-        });
-    },
-
-    getExtraItems() {
-      this.$http.get(`${this.$store.state.urlapi}extras/${this.resumenData.id_resumen}`)
-        .then((response) => {
-          if (response.status == 200) {
-            this.extraItems = JSON.parse(JSON.stringify(response.data));
-            let total = 0;
-            //TODO verificar esto
-            this.extraItems.map((item) => {
-              if (item.tipo === 1) {
-                item["tipo_display"] = "Gasto";
-                total -= item.monto;
-              } else {
-                item["tipo_display"] = "Ingreso";
-                total += item.monto;
-              }
-            });
-            this.totalExtras = total;
-            this.sectionTitle = `Resumen diario: ${this.resumenData.fecha_resumen.slice(
-              0,
-              10
-            )}`;
+            this.sectionTitle = `Resumen diario: ${this.resumenData.fecha_resumen.slice(0,10)}`;
+            if(this.allowDeleteExtras !== true){
+              this.extraTableHeaders.splice(3,1);
+            }
             this.checkTotalRecaudado();
           }
         })
@@ -141,27 +120,48 @@ export default {
             `${this.$store.state.urlapi}resumenes/${this.resumenData.id_resumen}`,
             resu
           )
+          .then(console.log("total actualizado"))
           .catch((error) => {
             alert(`${error.message}`);
           });
       }
     },
 
+    deleteExtraItem(item){
+      this.$emit("deleteExtra", item);
+    },
+
     verpdf() {
-      let ventasData = [[{ text: "Nombre", bold: true }, { text: "Precio", bold: true }, { text: "Cantidad", bold: true }, { text: "Subtotal", bold: true }]];
-      this.resumenItems.map(item => {
+      let ventasData = [
+        [
+          { text: "Nombre", bold: true },
+          { text: "Precio", bold: true },
+          { text: "Cantidad", bold: true },
+          { text: "Subtotal", bold: true },
+        ],
+      ];
+      this.resumenItems.map((item) => {
         ventasData.push(Object.values(item));
       });
-      let extrasData = [[{ text: "Descripción", bold: true }, { text: "Monto", bold: true }, { text: "Tipo", bold: true }]];
-      this.extraItems.map(item => {
-        const it = [item.descripcion, item.monto, item.tipo_display]
+      let extrasData = [
+        [
+          { text: "Descripción", bold: true },
+          { text: "Monto", bold: true },
+          { text: "Tipo", bold: true },
+        ],
+      ];
+      this.extraItems.map((item) => {
+        const it = [item.descripcion, item.monto, item.tipo_display];
         extrasData.push(Object.values(it));
       });
 
       let docDefinition = {
         content: [
           {
-            text: `Resumen diario: ${this.resumenData.fecha_resumen.slice(0,10)}`,
+            text: `Resumen diario: ${this.resumenData.fecha_resumen.slice(
+              0,
+              10
+            )}`,
             style: "header",
           },
           { text: "Ventas", style: "tableTitle" },
@@ -186,7 +186,10 @@ export default {
           { text: `Total extras: ${this.totalExtras}`, style: "resultsStyle" },
           " ",
           { text: `Total final: ${this.totalFinal}`, style: "resultsStyle" },
-          { text: `Total/2: ${this.totalFinal/2}`, style: ["resultsStyle", "finalResults"] }
+          {
+            text: `Total/2: ${this.totalFinal / 2}`,
+            style: ["resultsStyle", "finalResults"],
+          },
         ],
 
         styles: {
@@ -203,10 +206,10 @@ export default {
           resultsStyle: {
             italics: true,
             fontSize: 14,
-            alignment: "center"
+            alignment: "center",
           },
           finalResults: {
-            color: 'blue'
+            color: "blue",
           },
         },
       };
@@ -217,6 +220,6 @@ export default {
   },
   created() {
     this.getResumenData();
-  },
+  }
 };
 </script>

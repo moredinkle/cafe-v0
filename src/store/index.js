@@ -45,9 +45,9 @@ export default new Vuex.Store({
 
     setMenuData(state, { fecha, idMenu, idResumen, estadoMenu }) {
       state.fechaActual = fecha;
-      state.idMenuActual = idMenu;
-      state.idResumenActual = idResumen;
-      state.estadoMenuActual = estadoMenu;
+      state.idMenuActual = +idMenu;
+      state.idResumenActual = +idResumen;
+      state.estadoMenuActual = +estadoMenu;
     },
   },
 });

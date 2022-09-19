@@ -71,7 +71,7 @@ export default {
           alert(`${error.message}`);
         });
     },
-    //TODO cambiar las peticiones de getMenuItems a que utilicen el store. buscar todas y cambiarlas
+    //TODO seguir con pruebas
   },
   mounted() {
     this.setCurrentMenuData();
