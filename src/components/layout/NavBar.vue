@@ -1,16 +1,17 @@
 <template>
   <div>
     <v-app-bar app color="black" dark>
-      <v-app-bar-nav-icon @click.stop="drawerIsVisible = !drawerIsVisible"/>
+      <v-app-bar-nav-icon @click.stop="checkLogin" />
       <v-toolbar-title>logo_cafe.png</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <span v-if="loggedIn">
+        <v-btn dark text color="white" @click="logout"
+          >cerrar sesión <v-icon right>mdi-logout-variant</v-icon>
+        </v-btn>
+      </span>
     </v-app-bar>
 
-    <v-navigation-drawer
-      v-model="drawerIsVisible"
-      app
-      class="black"
-      temporary
-    >
+    <v-navigation-drawer v-model="drawerIsVisible" app class="black" temporary>
       <v-list>
         <v-list-item
           v-for="link in links"
@@ -40,12 +41,38 @@ export default {
     return {
       drawerIsVisible: false,
       links: [
-        { icon: "mdi-coffee-maker-outline", text: "Menú del dia", route: "/menu-dia", },
-        { icon: "mdi-receipt-text", text: "Pedidos", route: "/", },
-        { icon: "mdi-text-box-check-outline", text: "Resumen", route: "/resumen" },
+        {
+          icon: "mdi-coffee-maker-outline",
+          text: "Menú del dia",
+          route: "/menu-dia",
+        },
+        { icon: "mdi-receipt-text", text: "Pedidos", route: "/ventas" },
+        {
+          icon: "mdi-text-box-check-outline",
+          text: "Resumen",
+          route: "/resumen",
+        },
         { icon: "mdi-folder", text: "Historial", route: "/historial" },
       ],
     };
   },
+  computed: {
+    loggedIn() {
+      return this.$store.state.isLoggedIn;
+    },
+  },
+  methods: {
+    checkLogin(){
+      if(this.loggedIn) this.drawerIsVisible = !this.drawerIsVisible;
+    },
+
+    logout(){
+      this.$store.commit("logout");
+      this.$store.commit("setMenuData", {fecha: '', idMenu: 0, idResumen: 0, estadoMenu: 0});
+      this.$store.commit("setMenuItems", []);
+      this.$router.push("/");
+    }
+  },
+  // TODO revisar porque loggedin siempre es true
 };
 </script>

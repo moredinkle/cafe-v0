@@ -6,14 +6,12 @@
     :allowDeleteExtras="true"
     @deleteExtra="deleteExtraItem"
   >
-    <form-component
-      formTitle="Añadir extra"
-      :formElements="extraFormItems"
-      @saveForm="saveExtraItem"
-    >
+    <form-component :formElements="extraFormItems" @saveForm="saveExtraItem">
+      <h3>Añadir extra</h3>
       <v-switch
         v-model="esGasto"
         color="warning"
+        class="mx-3"
         inset
         :label="switchLabel"
       ></v-switch>
@@ -180,6 +178,7 @@ export default {
     },
   },
   created() {
+    this.$globalLoginCheck();
     this.getResumenItems();
   },
 };

@@ -8,6 +8,13 @@ import store from './store'
 Vue.config.productionTip = false
 Vue.prototype.$http = Axios
 
+Vue.prototype.$globalLoginCheck = function () {
+  if (!this.$store.state.isLoggedIn && this.$router.currentRoute.path !== '/') {
+    this.$router.push("/");
+  }
+}
+
+
 new Vue({
   router,
   vuetify,

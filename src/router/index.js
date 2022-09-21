@@ -7,7 +7,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
+    path: '/ventas',
     name: 'home',
     component: SalesView
   },
@@ -27,12 +27,17 @@ const routes = [
   {
     path: '/historial',
     name: 'historial',
-    component: () => import(/* webpackChunkName: "about" */ '../views/HistorialView.vue')
+    component: () => import('../views/HistorialView.vue')
   },
   {
     path: '/historial/:id_resumen/:id_menu',
     name: 'resumen-pasado',
-    component: () => import(/* webpackChunkName: "about" */ '../views/ResumenPasadoView.vue')
+    component: () => import('../views/ResumenPasadoView.vue')
+  },
+  {
+    path: '/',
+    name: 'login',
+    component: () => import('../views/LoginView.vue')
   },
 ]
 

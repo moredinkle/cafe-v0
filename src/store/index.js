@@ -12,7 +12,9 @@ export default new Vuex.Store({
   ],
 
   state: {
-    // loggedin: false,
+    isLoggedIn: false,
+    username: '',
+    userLevel: -1,
     idMenuActual: 0,
     idResumenActual: 0,
     estadoMenuActual: 0,
@@ -49,5 +51,17 @@ export default new Vuex.Store({
       state.idResumenActual = +idResumen;
       state.estadoMenuActual = +estadoMenu;
     },
+
+    setUserInfo(state, {username, nivel}){
+      state.isLoggedIn = true;
+      state.username = username;
+      state.userLevel = nivel;
+    },
+
+    logout(state){
+      state.isLoggedIn = false;
+      state.username = '';
+      state.userLevel = -1;
+    }
   },
 });

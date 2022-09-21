@@ -204,5 +204,8 @@ export default {
         });
     },
   },
+  created(){
+    this.$globalLoginCheck();
+  }
 };
 </script>

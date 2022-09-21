@@ -7,11 +7,9 @@
     <v-btn class="mb-3" dark color="black" @click="dateDialog = true"
       >Crear nuevo menú</v-btn
     >
-    <form-component
-      :formTitle="menuFormTitle"
-      :formElements="menuFormItems"
-      @saveForm="saveMenuItem"
-    />
+    <form-component :formElements="menuFormItems" @saveForm="saveMenuItem">
+      <h3>{{menuFormTitle}}</h3>
+    </form-component>
     <table-component
       class="my-3"
       :headers="tableHeaders"
@@ -217,7 +215,7 @@ export default {
       });
     },
 
-    requestMenuItems(){
+    requestMenuItems() {
       this.$http
         .get(`${this.$store.state.urlapi}menu-items/${this.idMenuActual}`)
         .then((response) => {
@@ -312,6 +310,7 @@ export default {
   },
 
   created() {
+    this.$globalLoginCheck();
     this.getMenuItems();
     this.checkMenuState();
     var date = new Date();

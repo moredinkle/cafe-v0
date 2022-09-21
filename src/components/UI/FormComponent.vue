@@ -1,7 +1,6 @@
 <template>
   <v-card rounded>
-    <v-card-title>
-      <div class="text-h5 mx-5">{{ formTitle }}</div>
+    <v-card-title :class="titleClass">
       <slot></slot>
     </v-card-title>
     <v-card-text>
@@ -32,7 +31,9 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="warning" text @click="reset"> Vaciar </v-btn>
-      <v-btn color="success" text @click="save" :disabled="!valid"> Guardar </v-btn>
+      <v-btn color="success" text @click="save" :disabled="!valid">
+        {{ sendFormText }}
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -44,6 +45,14 @@ export default {
   props: {
     formElements: Array,
     formTitle: String,
+    sendFormText: {
+      type: String,
+      default: "Guardar",
+    },
+    titleClass: {
+      type: String,
+      default: "mx-4",
+    },
   },
 
   data() {
@@ -57,14 +66,14 @@ export default {
   },
 
   methods: {
-    save(){
-      this.$emit('saveForm',this.form.parent_id);
+    save() {
+      this.$emit("saveForm", this.form.parent_id);
       this.reset();
     },
 
     reset() {
-        this.$refs.form.reset();
-    }
+      this.$refs.form.reset();
+    },
   },
 };
 </script>
