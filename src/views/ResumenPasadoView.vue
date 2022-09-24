@@ -49,6 +49,7 @@ export default {
               if (item.tipo === 1) item["tipo_display"] = "Gasto";
               else item["tipo_display"] = "Ingreso";
             });
+            this.getServidoresItems();
           }
         })
         .catch((error) => {
@@ -58,7 +59,7 @@ export default {
     getServidoresItems(){
       this.$http
         .get(
-          `${this.$store.state.urlapi}menus/extra/servidores/${this.$route.params.id_resumen}`
+          `${this.$store.state.urlapi}menus/extra/servidores/${this.$route.params.id_menu}`
         )
         .then((response) => {
           if (response.status == 200) {

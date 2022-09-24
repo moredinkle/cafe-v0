@@ -60,7 +60,7 @@ export default {
   },
   methods: {
     copyMenu() {
-      this.availableItems = this.$store.state.menuActualItems.filter(item => item.vendidos < item.stock);
+      this.availableItems = this.$store.state.menuActualItems.filter(item => item.stock_actual > 0);
       this.availableItems.map((item) => {
         item["textoPrecio"] = `Bs. ${item["precio"]}`;
         item["subtotal"] = item["precio"];

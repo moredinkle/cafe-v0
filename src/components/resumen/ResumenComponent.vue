@@ -150,10 +150,10 @@ export default {
     verpdf() {
       let ventasData = [
         [
-          { text: "Nombre", bold: true },
-          { text: "Precio", bold: true },
-          { text: "Cantidad", bold: true },
-          { text: "Subtotal", bold: true },
+          { text: "Nombre", bold: true, fillColor: '#e0ebeb' },
+          { text: "Precio", bold: true, fillColor: '#e0ebeb' },
+          { text: "Cantidad", bold: true, fillColor: '#e0ebeb' },
+          { text: "Subtotal", bold: true, fillColor: '#e0ebeb' },
         ],
       ];
       this.resumenItems.map((item) => {
@@ -161,9 +161,9 @@ export default {
       });
       let extrasData = [
         [
-          { text: "Descripción", bold: true },
-          { text: "Monto", bold: true },
-          { text: "Tipo", bold: true },
+          { text: "Descripción", bold: true, fillColor: '#e0ebeb' },
+          { text: "Monto", bold: true, fillColor: '#e0ebeb' },
+          { text: "Tipo", bold: true, fillColor: '#e0ebeb' },
         ],
       ];
       this.extraItems.map((item) => {
@@ -172,8 +172,8 @@ export default {
       });
       let servidoresData = [
         [
-          { text: "Nombre", bold: true },
-          { text: "Cantidad", bold: true }
+          { text: "Nombre", bold: true, fillColor: '#e0ebeb' },
+          { text: "Cantidad", bold: true, fillColor: '#e0ebeb' }
         ],
       ];
       this.servidoresItems.map((item) => {
@@ -191,6 +191,7 @@ export default {
             style: "header",
           },
           { text: "Ventas", style: "tableTitle" },
+          " ",
           {
             table: {
               headerRows: 1,
@@ -200,6 +201,7 @@ export default {
           },
           " ",
           { text: "Para servidores", style: "tableTitle" },
+          " ",
           {
             table: {
               headerRows: 1,
@@ -209,6 +211,7 @@ export default {
           },
           " ",
           { text: "Extras", style: "tableTitle" },
+          " ",
           {
             table: {
               headerRows: 1,
@@ -235,8 +238,8 @@ export default {
           },
           tableTitle: {
             italics: true,
-            lineHeight: 2,
             fontSize: 18,
+            background: '#e6ffe6'
           },
           resultsStyle: {
             italics: true,

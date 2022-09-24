@@ -6,7 +6,7 @@
       <v-spacer></v-spacer>
       <span v-if="loggedIn">
         <v-btn dark text color="white" @click="logout"
-          >cerrar sesión <v-icon right>mdi-logout-variant</v-icon>
+          ><span v-if="tamano > 450">cerrar sesión</span> <v-icon right>mdi-logout-variant</v-icon>
         </v-btn>
       </span>
     </v-app-bar>
@@ -60,6 +60,9 @@ export default {
     loggedIn() {
       return this.$store.state.isLoggedIn;
     },
+    tamano(){
+      return this.$vuetify.breakpoint.width;
+    }
   },
   methods: {
     checkLogin() {
@@ -67,45 +70,16 @@ export default {
     },
 
     logout() {
-      this.updateStock();
-    },
-
-    updateStock() {
-      let promesas = [];
-        //TODO probar primero filter y luego actualizar
-      let itemsActualizables = this.$store.state.menuActualItems.filter(item => item.vendidos > 0);
-      itemsActualizables.map((item) => {
-        let newStock = Number(item.stock) - Number(item.vendidos);
-        promesas.push(
-          this.$http
-            .put(
-              `${this.$store.state.urlapi}menu-items/stock/${item.id_item_menu}`,
-              { stock: newStock }
-            )
-            .then((response) => {
-              if (response.status == 200) {
-                response.data;
-              }
-            })
-            .catch((error) => {
-              alert(`${error.message}`);
-            })
-        );
+      this.$store.commit("logout");
+      this.$store.commit("setMenuData", {
+        fecha: "",
+        idMenu: 0,
+        idResumen: 0,
+        estadoMenu: 0,
       });
-
-      Promise.all(promesas).then(() => {
-        this.$store.commit("logout");
-        this.$store.commit("setMenuData", {
-          fecha: "",
-          idMenu: 0,
-          idResumen: 0,
-          estadoMenu: 0,
-        });
-        this.$store.commit("setMenuItems", []);
-        this.$router.push("/");
-      });
+      this.$store.commit("setMenuItems", []);
+      this.$router.push("/");
     },
   },
-  // TODO revisar porque loggedin siempre es true
 };
 </script>

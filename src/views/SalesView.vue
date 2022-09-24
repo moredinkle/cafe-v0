@@ -12,22 +12,24 @@
     />
 
     <h2 class="mb-2">Pagado con:</h2>
-    <v-text-field
-      class="mx-2"
-      v-model="pagadoCon"
-      name="pagadocon"
-      label="Pagado con"
-      type="number"
-      :rules="pagadoConRules"
-      outlined
-      filled
-      @input="calcularCambio"
-    ></v-text-field>
+    <div class="centrar">
+      <v-text-field
+        class="mx-2 pagadocon"
+        v-model="pagadoCon"
+        name="pagadocon"
+        label="Pagado con"
+        type="number"
+        :rules="pagadoConRules"
+        outlined
+        filled
+        @input="calcularCambio"
+      ></v-text-field>
+    </div>
     <h3>
       Total a pagar: {{ precioFinal }} <br />
       Cambio: {{ cambio }}
     </h3>
-    <div class="centrar-switch">
+    <div class="centrar">
       <v-switch
         v-model="esVenta"
         color="success"
@@ -118,7 +120,7 @@ export default {
       else x = Number(aux.cantidad);
 
       //vendidos > stock
-      if (x + Number(item.vendidos) > Number(item.stock)) {
+      if (x + Number(item.vendidos) > Number(item.stock_actual)) {
         this.$root.vtoast.show({
           text: "No alcanza jefe",
           color: "error",
@@ -198,7 +200,7 @@ export default {
             });
 
             Promise.all(promesas).then(() => {
-              this.actualizarVendidos();
+              this.requestMenuItems();
               this.order = [];
               this.cambio = 0;
               this.pagadoCon = +0;
@@ -219,21 +221,6 @@ export default {
         });
     },
 
-    actualizarVendidos() {
-      this.order.map((item) => {
-        let ind = this.$store.state.menuActualItems.findIndex(
-          (i) => i.id_item_menu === item.id_item_menu
-        );
-        const newVendidos =
-          Number(this.$store.state.menuActualItems[ind].vendidos) +
-          Number(item.cantidad);
-        this.$store.commit("changeStockMenuItem", {
-          ind: ind,
-          res: newVendidos,
-        });
-      });
-    },
-
     setCurrentMenu() {
       const menu = { estado_menu: 1 };
       this.$http
@@ -250,7 +237,28 @@ export default {
           alert(`${error.message}`);
         });
     },
+
+    requestMenuItems() {
+      this.$http
+        .get(`${this.$store.state.urlapi}menu-items/${this.idMenuActual}`)
+        .then((response) => {
+          if (response.status == 200) {
+            let aux = JSON.parse(JSON.stringify(response.data));
+            aux.map((item) => {
+              item.estado === 1
+                ? (item["checkbox"] = true)
+                : (item["checkbox"] = false);
+              item["vendidos"] = 0;
+            });
+            this.$store.commit("setMenuItems", aux);
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
   },
+
   created() {
     this.$globalLoginCheck();
   },
@@ -258,8 +266,11 @@ export default {
 </script>
 
 <style scoped>
-.centrar-switch {
+.centrar {
   display: flex;
   justify-content: center;
+}
+.pagadocon {
+  max-width: 600px;
 }
 </style>

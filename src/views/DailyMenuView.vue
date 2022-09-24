@@ -135,7 +135,7 @@ export default {
           value: "nombre",
         },
         { text: "Precio", value: "precio" },
-        { text: "Stock", value: "stock" },
+        { text: "Stock", value: "stock_actual" },
         { text: "Eliminar", value: "actions", sortable: false },
       ],
       menuItems: [],
@@ -218,11 +218,6 @@ export default {
 
     getMenuItems() {
       this.menuItems = this.$store.state.menuActualItems;
-      // this.menuItems.map((item) => {
-      //   item.estado === 1
-      //     ? (item["checkbox"] = true)
-      //     : (item["checkbox"] = false);
-      // });
     },
 
     requestMenuItems() {
@@ -267,7 +262,6 @@ export default {
       if (this.estadoMenuActual !== 0) {
         this.allowDeleteButton = false;
         this.tableHeaders.splice(this.tableHeaders.length - 1, 1);
-        this.tableHeaders.push({ text: "Vendidos", value: "vendidos" });
       }
     },
 
