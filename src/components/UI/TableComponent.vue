@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card rounded>
-      <v-data-table :headers="headers" :items="items" hide-default-footer>
+      <v-data-table :headers="headers" :items="items" hide-default-footer disable-pagination>
         <template v-slot:top>
           <v-toolbar flat>
             <v-toolbar-title>{{ tableTitle }}</v-toolbar-title>

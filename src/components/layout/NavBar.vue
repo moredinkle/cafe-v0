@@ -62,16 +62,49 @@ export default {
     },
   },
   methods: {
-    checkLogin(){
-      if(this.loggedIn) this.drawerIsVisible = !this.drawerIsVisible;
+    checkLogin() {
+      if (this.loggedIn) this.drawerIsVisible = !this.drawerIsVisible;
     },
 
-    logout(){
-      this.$store.commit("logout");
-      this.$store.commit("setMenuData", {fecha: '', idMenu: 0, idResumen: 0, estadoMenu: 0});
-      this.$store.commit("setMenuItems", []);
-      this.$router.push("/");
-    }
+    logout() {
+      this.updateStock();
+    },
+
+    updateStock() {
+      let promesas = [];
+        //TODO probar primero filter y luego actualizar
+      let itemsActualizables = this.$store.state.menuActualItems.filter(item => item.vendidos > 0);
+      itemsActualizables.map((item) => {
+        let newStock = Number(item.stock) - Number(item.vendidos);
+        promesas.push(
+          this.$http
+            .put(
+              `${this.$store.state.urlapi}menu-items/stock/${item.id_item_menu}`,
+              { stock: newStock }
+            )
+            .then((response) => {
+              if (response.status == 200) {
+                response.data;
+              }
+            })
+            .catch((error) => {
+              alert(`${error.message}`);
+            })
+        );
+      });
+
+      Promise.all(promesas).then(() => {
+        this.$store.commit("logout");
+        this.$store.commit("setMenuData", {
+          fecha: "",
+          idMenu: 0,
+          idResumen: 0,
+          estadoMenu: 0,
+        });
+        this.$store.commit("setMenuItems", []);
+        this.$router.push("/");
+      });
+    },
   },
   // TODO revisar porque loggedin siempre es true
 };

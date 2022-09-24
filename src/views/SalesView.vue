@@ -94,22 +94,35 @@ export default {
 
   methods: {
     addToOrder(item) {
-      let repetido = false;
       let aux = { ...item };
-      //buscar si el nuevo item ya esta en la orden, si esta calcular la cantidad y el subtotal
-      this.order.map((element) => {
-        if (element.id_item_menu === item.id_item_menu) {
-          element.cantidad =
-            parseInt(element.cantidad) + parseInt(item.cantidad);
-          element.subtotal =
-            parseInt(element.precio) * parseInt(element.cantidad);
-          repetido = true;
-        }
-      });
-      if (!repetido) {
-        aux.subtotal = parseInt(aux.precio) * parseInt(aux.cantidad);
+      //buscar si el nuevo item ya esta en la orden
+      let ind = this.order.findIndex(
+        (i) => i.id_item_menu === item.id_item_menu
+      );
+      let x = 0;
+      //si está en la orden ?
+      if (ind >= 0) x = Number(this.order[ind].cantidad) + Number(aux.cantidad);
+      else x = Number(aux.cantidad);
+
+      //vendidos > stock
+      if (x + Number(item.vendidos) > Number(item.stock)) {
+        this.$root.vtoast.show({
+          text: "No alcanza jefe",
+          color: "error",
+          timer: 3000,
+        });
+        return;
+      }
+      //si pasa, recien lo guarda en order
+      if (ind >= 0) {
+        this.order[ind].cantidad = x;
+        this.order[ind].subtotal =
+          Number(this.order[ind].precio) * Number(this.order[ind].cantidad);
+      } else {
+        aux.subtotal = Number(aux.precio) * Number(aux.cantidad);
         this.order.push(aux);
       }
+
       this.calcularPrecioFinal();
       this.$root.vtoast.show({ text: "Añadido al pedido", color: "info" });
     },
@@ -124,7 +137,7 @@ export default {
 
     calcularPrecioFinal() {
       let preciofin = 0;
-      this.order.map((element) => (preciofin += parseInt(element.subtotal)));
+      this.order.map((element) => (preciofin += Number(element.subtotal)));
       this.precioFinal = preciofin;
       this.calcularCambio();
     },
@@ -170,8 +183,8 @@ export default {
               );
             });
 
-            Promise.all(promesas).then((res) => {
-              res;
+            Promise.all(promesas).then(() => {
+              this.actualizarVendidos();
               this.order = [];
               this.cambio = 0;
               this.pagadoCon = +0;
@@ -191,9 +204,24 @@ export default {
         });
     },
 
+    actualizarVendidos() {
+      this.order.map((item) => {
+        let ind = this.$store.state.menuActualItems.findIndex(
+          (i) => i.id_item_menu === item.id_item_menu
+        );
+        const newVendidos = Number(this.$store.state.menuActualItems[ind].vendidos) +
+          Number(item.cantidad);
+        this.$store.commit("changeStockMenuItem", {ind: ind, res: newVendidos});
+      });
+    },
+
     setCurrentMenu() {
       const menu = { estado_menu: 1 };
-      this.$http.put(`${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,menu)
+      this.$http
+        .put(
+          `${this.$store.state.urlapi}menus/${this.$store.state.idMenuActual}`,
+          menu
+        )
         .then((response) => {
           if (response.status == 200) {
             this.$store.commit("cambiarEstadoMenu", 1);
@@ -204,8 +232,8 @@ export default {
         });
     },
   },
-  created(){
+  created() {
     this.$globalLoginCheck();
-  }
+  },
 };
 </script>

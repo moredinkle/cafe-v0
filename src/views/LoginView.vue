@@ -103,6 +103,7 @@ export default {
               item.estado === 1
                 ? (item["checkbox"] = true)
                 : (item["checkbox"] = false);
+              item["vendidos"] = Number(0);
             });
             this.$store.commit("setMenuItems", aux);
           }

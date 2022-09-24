@@ -19,7 +19,7 @@
       :tableTitle="menuTableTitle"
     />
 
-    <card-component cardTitle="Disponibilidad">
+    <!-- <card-component cardTitle="Disponibilidad">
       <div v-for="item in menuItems" :key="item.id_item_menu">
         <v-spacer></v-spacer>
         <v-switch
@@ -29,7 +29,7 @@
           @change="changeItemState(item)"
         ></v-switch>
       </div>
-    </card-component>
+    </card-component> -->
 
     <!-- dialogo para crear un nuevo menú -->
     <popup-dialog
@@ -56,7 +56,7 @@
 <script>
 import FormComponent from "../components/UI/FormComponent.vue";
 import TableComponent from "../components/UI/TableComponent.vue";
-import CardComponent from "../components/UI/CardComponent.vue";
+// import CardComponent from "../components/UI/CardComponent.vue";
 import PopupDialog from "../components/UI/PopupDialog.vue";
 import SnackBar from "../components/UI/SnackBar.vue";
 
@@ -68,7 +68,7 @@ export default {
     TableComponent,
     PopupDialog,
     SnackBar,
-    CardComponent,
+    // CardComponent,
   },
 
   computed: {
@@ -117,6 +117,15 @@ export default {
             (v) => (v && v.length <= 10) || "Máximo 10 caracteres",
           ],
         },
+        {
+          count: 10,
+          label: "Stock",
+          type: "number",
+          rules: [
+            (v) => !!v || "Campo obligatorio",
+            (v) => (v && v.length <= 10) || "Máximo 10 caracteres",
+          ],
+        },
       ],
       tableHeaders: [
         {
@@ -126,7 +135,7 @@ export default {
           value: "nombre",
         },
         { text: "Precio", value: "precio" },
-        // { text: "Disponible", value: "checkbox", sortable: false },
+        { text: "Stock", value: "stock" },
         { text: "Eliminar", value: "actions", sortable: false },
       ],
       menuItems: [],
@@ -169,6 +178,7 @@ export default {
       const menuItem = {
         nombre: formData[0],
         precio: +formData[1],
+        stock: +formData[2],
       };
       this.$http
         .post(
@@ -256,6 +266,7 @@ export default {
       if (this.estadoMenuActual !== 0) {
         this.allowDeleteButton = false;
         this.tableHeaders.splice(this.tableHeaders.length - 1, 1);
+        this.tableHeaders.push({ text: "Vendidos", value: "vendidos" });
       }
     },
 

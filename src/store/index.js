@@ -45,6 +45,10 @@ export default new Vuex.Store({
       state.menuActualItems = [...payload];
     },
 
+    changeStockMenuItem(state, {ind, res}){
+      state.menuActualItems[ind].vendidos = Number(res);
+    },
+
     setMenuData(state, { fecha, idMenu, idResumen, estadoMenu }) {
       state.fechaActual = fecha;
       state.idMenuActual = +idMenu;

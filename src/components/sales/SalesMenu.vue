@@ -53,14 +53,14 @@ export default {
       cantidadRules: [
         (v) => !!v || "Campo obligatorio",
         (v) =>
-          (v && parseInt(v) > 0 && parseInt(v) <= 10) || "Máximo 10, minimo 1",
+          (v && parseInt(v) > 0 && parseInt(v) <= 20) || "Máximo 20, minimo 1",
       ],
       availableItems: [],
     };
   },
   methods: {
     copyMenu() {
-      this.availableItems = this.$store.state.menuActualItems.filter(item => item.checkbox !== false);
+      this.availableItems = this.$store.state.menuActualItems.filter(item => item.vendidos < item.stock);
       this.availableItems.map((item) => {
         item["textoPrecio"] = `Bs. ${item["precio"]}`;
         item["subtotal"] = item["precio"];
@@ -68,7 +68,7 @@ export default {
     },
 
     addToOrder(item) {
-      if (item.cantidad > 10 || item.cantidad < 1) {
+      if (item.cantidad > 20 || item.cantidad < 1) {
         this.$root.vtoast.show({ text: "Error", color: "error" });
         return;
       }
