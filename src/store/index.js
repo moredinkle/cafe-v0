@@ -21,7 +21,7 @@ export default new Vuex.Store({
     menuActualItems: [],
     totalFinalActual: 0,
     fechaActual: "",
-    urlapi: "http://localhost:3000/api/",
+    urlapi: "https://cafe-naciones-api-moredinkle.vercel.app/api/",
   },
 
   mutations: {
