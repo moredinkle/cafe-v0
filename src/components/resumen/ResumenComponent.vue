@@ -8,6 +8,12 @@
     />
     <table-component
       class="my-3"
+      :headers="servidoresTableHeaders"
+      :items="servidoresItems"
+      tableTitle="Para servidores"
+    />
+    <table-component
+      class="my-3"
       :headers="extraTableHeaders"
       :items="extraItems"
       :deleteButton="allowDeleteExtras"
@@ -42,6 +48,7 @@ export default {
   props: {
     resumenItems: Array,
     extraItems: Array,
+    servidoresItems: Array,
     idResumen: Number,
     allowDeleteExtras: Boolean,
   },
@@ -79,6 +86,15 @@ export default {
         { text: "Precio", value: "precio" },
         { text: "Cantidad", value: "cantidad" },
         { text: "Subtotal", value: "subtotal" },
+      ],
+      servidoresTableHeaders: [
+        {
+          text: "Nombre",
+          align: "start",
+          sortable: false,
+          value: "nombre",
+        },
+        { text: "Cantidad", value: "cantidad" }
       ],
       extraTableHeaders: [
         {
@@ -154,6 +170,16 @@ export default {
         const it = [item.descripcion, item.monto, item.tipo_display];
         extrasData.push(Object.values(it));
       });
+      let servidoresData = [
+        [
+          { text: "Nombre", bold: true },
+          { text: "Cantidad", bold: true }
+        ],
+      ];
+      this.servidoresItems.map((item) => {
+        const it = [item.nombre, item.cantidad];
+        servidoresData.push(Object.values(it));
+      });
 
       let docDefinition = {
         content: [
@@ -170,6 +196,15 @@ export default {
               headerRows: 1,
               widths: ["*", 100, 100, 100],
               body: ventasData,
+            },
+          },
+          " ",
+          { text: "Para servidores", style: "tableTitle" },
+          {
+            table: {
+              headerRows: 1,
+              widths: ["*", "*"],
+              body: servidoresData,
             },
           },
           " ",

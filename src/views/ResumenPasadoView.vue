@@ -2,6 +2,7 @@
   <resumen-component
     :resumenItems="resumenItems"
     :extraItems="extraItems"
+    :servidoresItems="servidoresItems"
     :idResumen="idresumen"
   />
 </template>
@@ -15,6 +16,7 @@ export default {
     return {
       resumenItems: [],
       extraItems: [],
+      servidoresItems: [],
       idresumen: parseInt(this.$route.params.id_resumen),
     };
   },
@@ -47,6 +49,21 @@ export default {
               if (item.tipo === 1) item["tipo_display"] = "Gasto";
               else item["tipo_display"] = "Ingreso";
             });
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+    getServidoresItems(){
+      this.$http
+        .get(
+          `${this.$store.state.urlapi}menus/extra/servidores/${this.$route.params.id_resumen}`
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            this.servidoresItems = JSON.parse(JSON.stringify(response.data));
+            console.log(this.servidoresItems);
           }
         })
         .catch((error) => {

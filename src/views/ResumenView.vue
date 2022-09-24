@@ -2,6 +2,7 @@
   <resumen-component
     :resumenItems="resumenItems"
     :extraItems="extraItems"
+    :servidoresItems="servidoresItems"
     :idResumen="idResumenActual"
     :allowDeleteExtras="true"
     @deleteExtra="deleteExtraItem"
@@ -85,6 +86,7 @@ export default {
         },
       ],
       resumenItems: [],
+      servidoresItems: [],
       extraItems: [],
     };
   },
@@ -119,22 +121,31 @@ export default {
         .then((response) => {
           if (response.status == 200) {
             this.extraItems = JSON.parse(JSON.stringify(response.data));
-            // let total = 0;
             this.extraItems.map((item) => {
-              if (item.tipo === 1) {
-                item["tipo_display"] = "Gasto";
-                // total -= item.monto;
-              } else {
-                item["tipo_display"] = "Ingreso";
-                // total += item.monto;
-              }
+              if (item.tipo === 1) item["tipo_display"] = "Gasto";
+              else item["tipo_display"] = "Ingreso";
             });
-            // this.totalExtras = total;
+            this.getServidoresItems();
             //guardar el nuevo total
             this.$store.commit(
               "cambiarTotalFinal",
               this.totalVentas + this.totalExtras
             );
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+    },
+
+    getServidoresItems(){
+      this.$http
+        .get(
+          `${this.$store.state.urlapi}menus/extra/servidores/${this.$store.state.idMenuActual}`
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            this.servidoresItems = JSON.parse(JSON.stringify(response.data));
           }
         })
         .catch((error) => {

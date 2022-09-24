@@ -27,6 +27,14 @@
       Total a pagar: {{ precioFinal }} <br />
       Cambio: {{ cambio }}
     </h3>
+    <div class="centrar-switch">
+      <v-switch
+        v-model="esVenta"
+        color="success"
+        inset
+        :label="switchLabel"
+      ></v-switch>
+    </div>
     <v-btn
       :disabled="!guardarPedidoValid"
       class="my-3"
@@ -54,6 +62,10 @@ export default {
   },
 
   computed: {
+    switchLabel() {
+      return this.esVenta === true ? "Venta" : "Servidor";
+    },
+
     fechaMenuActual() {
       return this.$store.state.fechaActual;
     },
@@ -74,6 +86,7 @@ export default {
   data() {
     return {
       order: [],
+      esVenta: true,
       precioFinal: 0,
       pagadoCon: 0,
       cambio: 0,
@@ -91,7 +104,7 @@ export default {
       ],
     };
   },
-
+  //TODO aumentar tipo a venta y switch
   methods: {
     addToOrder(item) {
       let aux = { ...item };
@@ -153,6 +166,7 @@ export default {
         precio_total: this.precioFinal,
         pagado_con: +this.pagadoCon,
         cambio: this.cambio,
+        tipo_pedido: this.esVenta === true ? 1 : 0,
         id_resumen: this.idResumenActual,
       };
       let promesas = [];
@@ -190,11 +204,12 @@ export default {
               this.pagadoCon = +0;
               this.precioFinal = 0;
               this.guardarPedidoValid = true;
+              this.esVenta = true;
               //si el menú es nuevo, lo bloquea
               if (this.estadoMenuActual === 0) this.setCurrentMenu();
               this.$root.vtoast.show({
                 text: "Pedido guardado!",
-                color: "success",
+                color: "info",
               });
             });
           }
@@ -209,9 +224,13 @@ export default {
         let ind = this.$store.state.menuActualItems.findIndex(
           (i) => i.id_item_menu === item.id_item_menu
         );
-        const newVendidos = Number(this.$store.state.menuActualItems[ind].vendidos) +
+        const newVendidos =
+          Number(this.$store.state.menuActualItems[ind].vendidos) +
           Number(item.cantidad);
-        this.$store.commit("changeStockMenuItem", {ind: ind, res: newVendidos});
+        this.$store.commit("changeStockMenuItem", {
+          ind: ind,
+          res: newVendidos,
+        });
       });
     },
 
@@ -237,3 +256,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.centrar-switch {
+  display: flex;
+  justify-content: center;
+}
+</style>
