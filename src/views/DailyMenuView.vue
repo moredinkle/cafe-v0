@@ -8,7 +8,7 @@
       >Crear nuevo menú</v-btn
     >
     <form-component :formElements="menuFormItems" @saveForm="saveMenuItem">
-      <h3>{{menuFormTitle}}</h3>
+      <h3>{{ menuFormTitle }}</h3>
     </form-component>
     <table-component
       class="my-3"
@@ -218,11 +218,11 @@ export default {
 
     getMenuItems() {
       this.menuItems = this.$store.state.menuActualItems;
-      this.menuItems.map((item) => {
-        item.estado === 1
-          ? (item["checkbox"] = true)
-          : (item["checkbox"] = false);
-      });
+      // this.menuItems.map((item) => {
+      //   item.estado === 1
+      //     ? (item["checkbox"] = true)
+      //     : (item["checkbox"] = false);
+      // });
     },
 
     requestMenuItems() {
@@ -235,6 +235,7 @@ export default {
               item.estado === 1
                 ? (item["checkbox"] = true)
                 : (item["checkbox"] = false);
+              item["vendidos"] = 0;
             });
             this.$store.commit("setMenuItems", aux);
             this.getMenuItems();
