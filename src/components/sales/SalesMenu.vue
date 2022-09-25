@@ -1,10 +1,11 @@
 <template>
   <div class="ma-3">
-    <v-row>
+    <!-- tablet para arriba -->
+    <v-row v-if="tamano > 450">
       <v-col
         cols="12"
-        sm="6"
-        md="4"
+        sm="4"
+        lg="3"
         v-for="item in availableItems"
         :key="item.id_item_menu"
       >
@@ -31,6 +32,35 @@
         </card-component>
       </v-col>
     </v-row>
+<!-- telefono -->
+    <v-row v-else class="centrar">
+      <v-col cols="12" v-for="item in availableItems" :key="item.id_item_menu">
+        <v-divider></v-divider>
+        <span class="mt-2 font-weight-bold text-h5 indigo--text text--darken-4">
+          {{ item.nombre }} |
+          {{ item.textoPrecio }}
+        </span>
+        <div class="d-flex centrar mt-2">
+          <v-form ref="form" v-model="valid">
+            <v-text-field
+              dense
+              class="formcantidad"
+              v-model="item.cantidad"
+              name="cantidad"
+              label="Cantidad"
+              type="number"
+              :rules="cantidadRules"
+              outlined
+              filled
+              single-line
+            ></v-text-field>
+          </v-form>
+          <v-btn large class="mx-2" color="success" @click="addToOrder(item)"
+            >Añadir</v-btn
+          >
+        </div>
+      </v-col>
+    </v-row>
 
     <snack-bar />
   </div>
@@ -46,7 +76,11 @@ export default {
     CardComponent,
     SnackBar,
   },
-  props: {},
+  computed: {
+    tamano() {
+      return this.$vuetify.breakpoint.width;
+    },
+  },
   data() {
     return {
       valid: true,
@@ -60,7 +94,9 @@ export default {
   },
   methods: {
     copyMenu() {
-      this.availableItems = this.$store.state.menuActualItems.filter(item => item.stock_actual > 0);
+      this.availableItems = this.$store.state.menuActualItems.filter(
+        (item) => item.stock_actual > 0
+      );
       this.availableItems.map((item) => {
         item["textoPrecio"] = `Bs. ${item["precio"]}`;
         item["subtotal"] = item["precio"];
@@ -77,8 +113,19 @@ export default {
     },
   },
 
-  mounted() {
+  created() {
     this.copyMenu();
   },
 };
 </script>
+
+<style scoped>
+.centrar {
+  display: flex;
+  justify-content: center;
+}
+.formcantidad {
+  max-width: 140px;
+}
+
+</style>
