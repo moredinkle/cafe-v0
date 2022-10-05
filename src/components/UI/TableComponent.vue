@@ -7,8 +7,9 @@
             <v-toolbar-title>{{ tableTitle }}</v-toolbar-title>
           </v-toolbar>
         </template>
-        <template v-if="deleteButton" v-slot:[`item.actions`]="{ item }">
-          <v-icon small @click="toggleDialog(item)"> mdi-delete </v-icon>
+        <template v-if="editButton || deleteButton" v-slot:[`item.actions`]="{ item }">
+          <v-icon v-if="editButton" small @click="emitEditItem(item)"> mdi-pencil </v-icon>
+          <v-icon v-if="deleteButton" small @click="toggleDialog(item)"> mdi-delete </v-icon>
         </template>
         <!-- <template v-if="allowCheckbox" v-slot:[`item.checkbox`]="{ item }">
           <v-simple-checkbox @input="checkboxChange(item)" v-model="item.checkbox"></v-simple-checkbox>
@@ -59,10 +60,9 @@ export default {
       this.itemToDelete = { ...item };
     },
 
-    // checkboxChange(item) {
-    //   console.log(item);
-    //   this.$emit("checkboxChange", item);
-    // },
+    emitEditItem(item){
+      this.$emit('editTableItem', item);
+    },
 
     closeDialog() {
       this.dialog = false;

@@ -15,7 +15,9 @@
       :headers="tableHeaders"
       :items="menuItems"
       :deleteButton="allowDeleteButton"
+      :editButton="!allowDeleteButton"
       @deleteTableItem="deleteMenuItem"
+      @editTableItem="editStockDialog"
       :tableTitle="menuTableTitle"
     />
 
@@ -47,6 +49,24 @@
       ></v-date-picker>
 
       <p>Nuevo menú: {{ newMenuDate }}</p>
+    </popup-dialog>
+
+    <!-- Dialogo para editar stock -->
+    <popup-dialog
+      :dialog="stockDialog"
+      actionConfirmText="guardar"
+      :dialogTitle="'Nuevo stock: ' + newStockObj.nombre"
+      @closeDialog="stockDialog = false"
+      @confirmDialogAction="saveNewStock"
+    >
+      <v-text-field
+        v-model="newStockObj.stock_actual"
+        label="Nuevo stock"
+        type="number"
+        required
+        outlined
+        filled
+      ></v-text-field>
     </popup-dialog>
 
     <snack-bar />
@@ -94,6 +114,8 @@ export default {
       today: "",
       newMenuDate: "",
       dateDialog: false,
+      stockDialog: false,
+      newStockObj: {},
       dateDialogTitle: "Crear nuevo menú",
       menuFormTitle: "Añadir al menú",
       menuTableTitle: "Menú del dia",
@@ -199,6 +221,29 @@ export default {
         });
     },
 
+    editStockDialog(item) {
+      this.stockDialog = true;
+      this.newStockObj = { ...item };
+    },
+
+    saveNewStock() {
+      let item = { stock_actual: this.newStockObj.stock_actual };
+      this.$http
+        .put(`${this.$store.state.urlapi}menu-items/stock/${this.newStockObj.id_item_menu}`,item)
+        .then((response) => {
+          if (response.status == 200) {
+            this.stockDialog = false;
+            this.newStockObj = {};
+            console.log("si");
+            this.requestMenuItems();
+          }
+        })
+        .catch((error) => {
+          alert(`${error.message}`);
+        });
+      //al final
+    },
+
     deleteMenuItem(item) {
       this.$http
         .delete(`${this.$store.state.urlapi}menu-items/${item.id_item_menu}`)
@@ -261,7 +306,11 @@ export default {
     checkMenuState() {
       if (this.estadoMenuActual !== 0) {
         this.allowDeleteButton = false;
-        this.tableHeaders.splice(this.tableHeaders.length - 1, 1);
+        this.tableHeaders[this.tableHeaders.length - 1] = {
+          text: "Editar",
+          value: "actions",
+          sortable: false,
+        };
       }
     },
 
