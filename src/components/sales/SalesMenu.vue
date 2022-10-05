@@ -86,8 +86,6 @@ export default {
       valid: true,
       cantidadRules: [
         (v) => !!v || "Campo obligatorio",
-        (v) =>
-          (v && parseInt(v) > 0 && parseInt(v) <= 20) || "Máximo 20, minimo 1",
       ],
       availableItems: [],
     };
@@ -104,7 +102,7 @@ export default {
     },
 
     addToOrder(item) {
-      if (item.cantidad > 20 || item.cantidad < 1) {
+      if (item.cantidad < 1) {
         this.$root.vtoast.show({ text: "Error", color: "error" });
         return;
       }

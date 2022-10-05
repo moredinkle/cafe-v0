@@ -6,6 +6,9 @@
       :items="resumenItems"
       tableTitle="Ventas"
     />
+    <h2 class="my-6 font-weight-black blue--text">
+      Total ventas: {{ totalVentas }}
+    </h2>
     <table-component
       class="my-3"
       :headers="servidoresTableHeaders"
@@ -20,12 +23,15 @@
       @deleteTableItem="deleteExtraItem"
       tableTitle="Extras"
     />
+    <h2 class="my-6 font-weight-black blue--text">
+      Total extras: {{ totalExtras }}
+    </h2>
     <h2 class="my-6 font-weight-black blue--text text--darken-4">
-      Total ventas: {{ totalVentas }}
+      Total final: {{ totalFinal }}
       <v-divider class="my-2"></v-divider>
-      Total ventas +/- extras: {{ totalFinal }}
+      Fondo para compras: {{ totalFinal / 2 }}
       <v-divider class="my-2"></v-divider>
-      Total / 2: {{ totalFinal / 2 }}
+      Efectivo entregado: {{ totalFinal / 2 }}
     </h2>
     <slot></slot>
     <v-btn class="mt-5" color="info" x-large @click="verpdf"
@@ -200,6 +206,8 @@ export default {
             },
           },
           " ",
+          { text: `Total ventas: ${this.totalVentas}`, style: "resultsStyle" },
+          " ",
           { text: "Para servidores", style: "tableTitle" },
           " ",
           {
@@ -220,12 +228,15 @@ export default {
             },
           },
           " ",
-          { text: `Total ventas: ${this.totalVentas}`, style: "resultsStyle" },
           { text: `Total extras: ${this.totalExtras}`, style: "resultsStyle" },
           " ",
           { text: `Total final: ${this.totalFinal}`, style: "resultsStyle" },
           {
-            text: `Total/2: ${this.totalFinal / 2}`,
+            text: `Fondo para compras: ${this.totalFinal / 2}`,
+            style: ["resultsStyle", "finalResults"],
+          },
+          {
+            text: `Efectivo entregado: ${this.totalFinal / 2}`,
             style: ["resultsStyle", "finalResults"],
           },
         ],
